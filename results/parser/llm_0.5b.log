@@ -1,0 +1,160 @@
+W1029 11:55:35.584000 23830 .venv/lib/python3.14/site-packages/torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:   0%|          | 1/290 [00:01<09:18,  1.93s/it]Loading weights: 100%|██████████| 290/290 [00:01<00:00, 149.57it/s]
+  FAIL 'Which activity dominates the first 10 minutes?'
+       got  op=count acts=[['standing_in_place', 'standing_moving']] range=(0.0, 600.0)
+       want op=identify acts=[] range=[0, 600]
+  FAIL 'Tell me what the user was up to from 5 to 8 minutes.'
+       got  op=duration acts=[['standing_moving', 'walking', 'running', 'bicycling']] range=(300.0, 480.0)
+       want op=identify acts=[] range=[300, 480]
+  FAIL 'What posture was the wearer in around 30 minutes?'
+       got  op=duration acts=[['standing_moving']] range=(1740.0, 1860.0)
+       want op=identify acts=[] range=[1740, 1860]
+  FAIL 'What was happening at 9:30?'
+       got  op=onset acts=[['lying_down']] range=(3600.0, 7200.0)
+       want op=identify acts=[] range=[3600, 7200]
+  FAIL 'What was the user doing at noon?'
+       got  op=open acts=[] range=(12600.0, 16200.0)
+       want op=identify acts=[] range=[12600, 16200]
+  FAIL 'Did they ride a bike at all?'
+       got  op=open acts=[] range=None
+       want op=verify acts=[['bicycling']] range=None
+  FAIL 'Was the participant reclining between 1 and 2 hours?'
+       got  op=duration acts=[['lying_down']] range=(3600.0, 7200.0)
+       want op=verify acts=[['lying_down']] range=[3600, 7200]
+  FAIL 'Were they moving around between 50 and 55 minutes?'
+       got  op=duration acts=[['standing_moving', 'walking', 'running', 'bicycling']] range=(3000.0, 3300.0)
+       want op=verify acts=[['standing_moving']] range=[3000, 3300]
+  FAIL 'Was the user standing during the last 5 minutes?'
+       got  op=duration acts=[['standing_in_place']] range=(6900.0, 7200.0)
+       want op=verify acts=[['standing_in_place', 'standing_moving']] range=[6900, 7200]
+  FAIL 'How much of the recording was spent lying down?'
+       got  op=count acts=[['lying_down']] range=None
+       want op=duration acts=[['lying_down']] range=None
+  FAIL 'What fraction of the time was the user walking?'
+       got  op=count acts=[['walking']] range=None
+       want op=duration acts=[['walking']] range=None
+  FAIL 'How long did the user spend on foot?'
+       got  op=duration acts=[['walking']] range=None
+       want op=duration acts=[['walking', 'running']] range=None
+  FAIL 'Did the user spend more time sitting or standing?'
+       got  op=prolonged acts=[['sitting', 'standing_in_place', 'standing_moving']] range=None
+       want op=compare acts=[['sitting'], ['standing_in_place', 'standing_moving']] range=None
+  FAIL 'Which was longer overall: walking or cycling?'
+       got  op=duration acts=[['walking']] range=None
+       want op=compare acts=[['walking'], ['bicycling']] range=None
+  FAIL 'Was there more running than walking?'
+       got  op=count acts=[['running']] range=None
+       want op=compare acts=[['running'], ['walking']] range=None
+  FAIL 'Did the user lie down for an extended period?'
+       got  op=open acts=[] range=None
+       want op=prolonged acts=[['lying_down']] range=None
+  FAIL 'Is the recording consistent with a morning workout?'
+       got  op=verify acts=[['bicycling']] range=(0.0, 14400.0)
+       want op=open acts=None range=[0, 14400]
+  FAIL 'Was the user exercising in the evening?'
+       got  op=verify acts=[['lying_down', 'sitting']] range=(36000.0, 50400.0)
+       want op=open acts=None range=[36000, 50400]
+  FAIL 'Was the user runing between 10 and 20 minutes?'
+       got  op=duration acts=[['running']] range=(600.0, 1200.0)
+       want op=verify acts=[['running']] range=[600, 1200]
+  FAIL 'Was the user walking in the first two minutes?'
+       got  op=duration acts=[['walking']] range=(0.0, 120.0)
+       want op=verify acts=[['walking']] range=[0, 120]
+  FAIL 'What was the user doing in the final five minutes?'
+       got  op=duration acts=[['standing_moving', 'walking', 'running', 'bicycling']] range=(6900.0, 7200.0)
+       want op=identify acts=[] range=[6900, 7200]
+dev {
+  "intent": 0.6181818181818182,
+  "op": 0.6363636363636364,
+  "activities": 0.7636363636363637,
+  "t_range": 1.0,
+  "per_tier": {
+    "identification": 0.29411764705882354,
+    "temporal": 0.7307692307692307,
+    "grounding": 1.0,
+    "open_world": 0.7142857142857143
+  },
+  "latency_ms_mean": 1648.7513066925617,
+  "n": 55,
+  "llm_calls": 55,
+  "llm_fallbacks": 8
+}
+  FAIL 'What activity was the participant engaged in from 1200 to 1500 seconds?'
+       got  op=duration acts=[['standing_moving']] range=(1200.0, 1500.0)
+       want op=identify acts=[] range=[1200, 1500]
+  FAIL 'Describe what the user was doing between minute 3 and minute 6.'
+       got  op=duration acts=[['standing_moving', 'walking']] range=(180.0, 360.0)
+       want op=identify acts=[] range=[180, 360]
+  FAIL 'What was the dominant behaviour in the final 20 minutes?'
+       got  op=longest acts=[['bicycling']] range=(6000.0, 7200.0)
+       want op=identify acts=[] range=[6000, 7200]
+  FAIL 'What was the user doing 45 minutes in?'
+       got  op=duration acts=[['standing_moving', 'walking', 'running', 'bicycling']] range=(2640.0, 2760.0)
+       want op=identify acts=[] range=[2640, 2760]
+  FAIL 'Was the user biking between 40 and 50 minutes?'
+       got  op=duration acts=[['bicycling']] range=(2400.0, 3000.0)
+       want op=verify acts=[['bicycling']] range=[2400, 3000]
+  FAIL 'Was the wearer lying in bed during the first hour?'
+       got  op=open acts=[] range=(0.0, 3600.0)
+       want op=verify acts=[['lying_down']] range=[0, 3600]
+  FAIL 'Is it true that the user was sitting from 600 to 900 seconds?'
+       got  op=duration acts=[['sitting']] range=(600.0, 900.0)
+       want op=verify acts=[['sitting']] range=[600, 900]
+  FAIL 'Was there any walking in the last 10 min?'
+       got  op=duration acts=[['walking']] range=(6600.0, 7200.0)
+       want op=verify acts=[['walking']] range=[6600, 7200]
+  FAIL 'Was the user sitting at 2 minutes?'
+       got  op=open acts=[] range=(60.0, 180.0)
+       want op=verify acts=[['sitting']] range=[60, 180]
+  FAIL 'What share of the session was spent walking?'
+       got  op=count acts=[['walking']] range=None
+       want op=duration acts=[['walking']] range=None
+  FAIL 'How much time was spent in strenuous activity?'
+       got  op=prolonged acts=[['running', 'bicycling']] range=None
+       want op=duration acts=[['running', 'bicycling']] range=None
+  FAIL 'How often did the user lie down?'
+       got  op=open acts=[['lying_down']] range=None
+       want op=count acts=[['lying_down']] range=None
+  FAIL 'How many times did the user stand still?'
+       got  op=count acts=[['standing_in_place', 'standing_moving']] range=None
+       want op=count acts=[['standing_in_place']] range=None
+  FAIL 'Did the user sit more than they lay down?'
+       got  op=open acts=[['lying_down']] range=None
+       want op=compare acts=[['sitting'], ['lying_down']] range=None
+  FAIL 'Which took up more of the day, walking or standing?'
+       got  op=prolonged acts=[['walking']] range=None
+       want op=compare acts=[['walking'], ['standing_in_place', 'standing_moving']] range=None
+  FAIL 'Was the user more often sedentary or active?'
+       got  op=prolonged acts=[['lying_down', 'sitting']] range=None
+       want op=compare acts=[['lying_down', 'sitting'], ['standing_moving', 'walking', 'running', 'bicycling']] range=None
+  FAIL 'Did the user spend longer lying down or sitting during the morning?'
+       got  op=prolonged acts=[['lying_down']] range=(0.0, 14400.0)
+       want op=compare acts=[['lying_down'], ['sitting']] range=[0, 14400]
+  FAIL 'Was the participant lying down for more than ten minutes at a stretch?'
+       got  op=open acts=[] range=None
+       want op=prolonged acts=[['lying_down']] range=None
+  FAIL 'Were there any extended periods of standing still?'
+       got  op=open acts=[] range=None
+       want op=prolonged acts=[['standing_in_place']] range=None
+  FAIL 'Is the pattern consistent with the user sleeping through the night?'
+       got  op=open acts=[] range=(50400.0, 79200.0)
+       want op=open acts=None range=None
+  FAIL 'Did the user take a nap in the afternoon?'
+       got  op=open acts=[] range=(12600.0, 16200.0)
+       want op=open acts=None range=[14400, 36000]
+test {
+  "intent": 0.58,
+  "op": 0.64,
+  "activities": 0.74,
+  "t_range": 0.96,
+  "per_tier": {
+    "identification": 0.25,
+    "temporal": 0.5833333333333334,
+    "grounding": 1.0,
+    "open_world": 0.7777777777777778
+  },
+  "latency_ms_mean": 1856.3237184012542,
+  "n": 50,
+  "llm_calls": 50,
+  "llm_fallbacks": 11
+}

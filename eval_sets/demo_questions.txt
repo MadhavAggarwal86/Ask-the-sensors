@@ -1,0 +1,11 @@
+What was the user doing between 600 and 900 seconds?
+Was the user walking in the first hour?
+How long did the user spend walking?
+How many separate walks did the user take?
+When did the user first lie down?
+Did the user spend more time walking or lying down?
+What was the longest walk?
+Did the user lie down for a prolonged period?
+Is the recording consistent with the user commuting?
+Is there any sign that the user fell?
+What was the user's heart rate?

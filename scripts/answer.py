@@ -2,6 +2,7 @@
 
     python scripts/answer.py --recording rec.csv --question "How long was the user walking?"
     python scripts/answer.py --recording rec.csv --questions questions.txt --json out.jsonl
+    python scripts/answer.py --recording rec.csv --questions questions.txt --parser hybrid   # SLM fallback
 
 Timestamps are reported in seconds from the start of the recording.
 """
@@ -21,12 +22,19 @@ def main():
     ap.add_argument("--questions", type=Path, help="text file, one question per line")
     ap.add_argument("--model", type=Path, default=C.MODELS_DIR / "hgb_full.joblib")
     ap.add_argument("--json", type=Path, help="also write JSON lines here")
+    ap.add_argument("--parser", choices=["rule", "hybrid"], default="rule",
+                    help="hybrid: a small LLM (pip install -e '.[llm]') takes questions the rules cannot route")
+    ap.add_argument("--llm-model", default="Qwen/Qwen2.5-0.5B-Instruct")
     args = ap.parse_args()
 
     qs = list(args.question)
     if args.questions:
         qs += [l.strip() for l in args.questions.read_text().splitlines() if l.strip()]
-    qa = SensorQA.from_path(args.model)
+    parser = None
+    if args.parser == "hybrid":
+        from ats.qa.llm import LLMParser
+        parser = LLMParser(args.llm_model, mode="hybrid")
+    qa = SensorQA.from_path(args.model, parser=parser)
     qa.load(load_csv(args.recording))
     print(f"# Time base: {C.TIME_BASE}\n")
     lines = []
