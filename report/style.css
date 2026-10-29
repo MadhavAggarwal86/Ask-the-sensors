@@ -1,0 +1,20 @@
+@page { size: A4; margin: 18mm 17mm 18mm 17mm; }
+body { font-family: "Charter", "Georgia", serif; font-size: 10.5pt; line-height: 1.38; color: #111;
+       max-width: none; margin: 0; }
+header { text-align: center; margin-bottom: 1.2em; }
+h1.title { font-size: 17pt; margin: 0 0 0.2em; }
+p.subtitle { font-size: 11pt; margin: 0; color: #444; }
+p.author, p.date { margin: 0.15em 0; color: #333; }
+h1 { font-size: 13.5pt; margin: 1.1em 0 0.35em; border-bottom: 1px solid #bbb; padding-bottom: 2px; }
+h2 { font-size: 11.5pt; margin: 0.9em 0 0.3em; }
+p { margin: 0.35em 0; text-align: justify; }
+ul, ol { margin: 0.3em 0 0.3em 1.3em; padding: 0; }
+li { margin: 0.12em 0; }
+table { border-collapse: collapse; margin: 0.5em auto; font-size: 9pt; page-break-inside: avoid; }
+th, td { border-bottom: 1px solid #ccc; padding: 2px 7px; text-align: left; }
+th { border-bottom: 1.5px solid #555; }
+caption { caption-side: bottom; font-size: 8.5pt; color: #444; padding-top: 3px; }
+figure { margin: 0.6em 0; text-align: center; page-break-inside: avoid; }
+figure img { max-width: 100%; }
+figcaption { font-size: 8.5pt; color: #444; margin-top: 2px; }
+code { font-family: "Menlo", monospace; font-size: 8.8pt; }
