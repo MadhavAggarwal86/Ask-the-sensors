@@ -1,0 +1,55 @@
+{"question": "What is the person doing between 300 and 420 seconds?", "op": "identify", "activities": [], "t_range": [300, 420], "tier": "identification"}
+{"question": "Which activity dominates the first 10 minutes?", "op": "identify", "activities": [], "t_range": [0, 600], "tier": "identification"}
+{"question": "Tell me what the user was up to from 5 to 8 minutes.", "op": "identify", "activities": [], "t_range": [300, 480], "tier": "identification"}
+{"question": "What posture was the wearer in around 30 minutes?", "op": "identify", "activities": [], "t_range": [1740, 1860], "tier": "identification"}
+{"question": "What was happening at 9:30?", "op": "identify", "activities": [], "t_range": [3600, 7200], "tier": "identification"}
+{"question": "What was the user doing at noon?", "op": "identify", "activities": [], "t_range": [12600, 16200], "tier": "identification"}
+{"question": "Was the user cycling in the last 15 minutes?", "op": "verify", "activities": [["bicycling"]], "t_range": [6300, 7200], "tier": "identification"}
+{"question": "Was the subject strolling between 600 and 900 seconds?", "op": "verify", "activities": [["walking"]], "t_range": [600, 900], "tier": "identification"}
+{"question": "Did the user go for a jog?", "op": "verify", "activities": [["running"]], "t_range": null, "tier": "identification"}
+{"question": "Did they ride a bike at all?", "op": "verify", "activities": [["bicycling"]], "t_range": null, "tier": "identification"}
+{"question": "Was the participant reclining between 1 and 2 hours?", "op": "verify", "activities": [["lying_down"]], "t_range": [3600, 7200], "tier": "identification"}
+{"question": "Was the user sedentary in the first half hour?", "op": "verify", "activities": [["lying_down", "sitting"]], "t_range": [0, 1800], "tier": "identification"}
+{"question": "Were they moving around between 50 and 55 minutes?", "op": "verify", "activities": [["standing_moving"]], "t_range": [3000, 3300], "tier": "identification"}
+{"question": "Was the user standing during the last 5 minutes?", "op": "verify", "activities": [["standing_in_place", "standing_moving"]], "t_range": [6900, 7200], "tier": "identification"}
+{"question": "How long did the user spend seated?", "op": "duration", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "For how many minutes was the user jogging?", "op": "duration", "activities": [["running"]], "t_range": null, "tier": "temporal"}
+{"question": "What was the total time spent pedalling?", "op": "duration", "activities": [["bicycling"]], "t_range": null, "tier": "temporal"}
+{"question": "How much of the recording was spent lying down?", "op": "duration", "activities": [["lying_down"]], "t_range": null, "tier": "temporal"}
+{"question": "What fraction of the time was the user walking?", "op": "duration", "activities": [["walking"]], "t_range": null, "tier": "temporal"}
+{"question": "How long was the user standing still between 10 and 40 minutes?", "op": "duration", "activities": [["standing_in_place"]], "t_range": [600, 2400], "tier": "temporal"}
+{"question": "How long was the user physically active?", "op": "duration", "activities": [["standing_moving", "walking", "running", "bicycling"]], "t_range": null, "tier": "temporal"}
+{"question": "How many minutes of vigorous activity were there?", "op": "duration", "activities": [["running", "bicycling"]], "t_range": null, "tier": "temporal"}
+{"question": "How long did the user spend on foot?", "op": "duration", "activities": [["walking", "running"]], "t_range": null, "tier": "temporal"}
+{"question": "How many walks did the user take?", "op": "count", "activities": [["walking"]], "t_range": null, "tier": "temporal"}
+{"question": "How many separate bouts of running were there?", "op": "count", "activities": [["running"]], "t_range": null, "tier": "temporal"}
+{"question": "How many times did the user sit down?", "op": "count", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "Count the cycling sessions.", "op": "count", "activities": [["bicycling"]], "t_range": null, "tier": "temporal"}
+{"question": "How many episodes of lying down happened in the morning?", "op": "count", "activities": [["lying_down"]], "t_range": [0, 14400], "tier": "temporal"}
+{"question": "Did the user spend more time sitting or standing?", "op": "compare", "activities": [["sitting"], ["standing_in_place", "standing_moving"]], "t_range": null, "tier": "temporal"}
+{"question": "Which was longer overall: walking or cycling?", "op": "compare", "activities": [["walking"], ["bicycling"]], "t_range": null, "tier": "temporal"}
+{"question": "Was there more running than walking?", "op": "compare", "activities": [["running"], ["walking"]], "t_range": null, "tier": "temporal"}
+{"question": "Compare the time spent lying down with the time spent sitting.", "op": "compare", "activities": [["lying_down"], ["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "What was the longest walk?", "op": "longest", "activities": [["walking"]], "t_range": null, "tier": "temporal"}
+{"question": "What was the longest continuous period of sitting?", "op": "longest", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "Which lying-down episode lasted the longest?", "op": "longest", "activities": [["lying_down"]], "t_range": null, "tier": "temporal"}
+{"question": "Did the user lie down for an extended period?", "op": "prolonged", "activities": [["lying_down"]], "t_range": null, "tier": "temporal"}
+{"question": "Was there a long stretch of sitting?", "op": "prolonged", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "Did the user remain seated for a prolonged time?", "op": "prolonged", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "When did the user start cycling?", "op": "onset", "activities": [["bicycling"]], "t_range": null, "tier": "grounding"}
+{"question": "At what point did the person begin to run?", "op": "onset", "activities": [["running"]], "t_range": null, "tier": "grounding"}
+{"question": "What time did the user first lie down?", "op": "onset", "activities": [["lying_down"]], "t_range": null, "tier": "grounding"}
+{"question": "When did the walking start after 20 minutes?", "op": "onset", "activities": [["walking"]], "t_range": [1200, 7200], "tier": "grounding"}
+{"question": "When did the user first get on the bike?", "op": "onset", "activities": [["bicycling"]], "t_range": null, "tier": "grounding"}
+{"question": "Is the recording consistent with a morning workout?", "op": "open", "activities": null, "t_range": [0, 14400], "tier": "open_world"}
+{"question": "Could the user have been doing household chores?", "op": "open", "activities": null, "t_range": null, "tier": "open_world"}
+{"question": "Does this look like a commute to work?", "op": "open", "activities": null, "t_range": null, "tier": "open_world"}
+{"question": "Was the user possibly asleep?", "op": "open", "activities": null, "t_range": null, "tier": "open_world"}
+{"question": "Is there any sign that the user fell?", "op": "open", "activities": null, "t_range": null, "tier": "open_world"}
+{"question": "Does the activity pattern suggest an office job?", "op": "open", "activities": null, "t_range": null, "tier": "open_world"}
+{"question": "Was the user exercising in the evening?", "op": "open", "activities": null, "t_range": [36000, 50400], "tier": "open_world"}
+{"question": "Was the user runing between 10 and 20 minutes?", "op": "verify", "activities": [["running"]], "t_range": [600, 1200], "tier": "identification"}
+{"question": "How long did the user spend sittng?", "op": "duration", "activities": [["sitting"]], "t_range": null, "tier": "temporal"}
+{"question": "Was the user walking in the first two minutes?", "op": "verify", "activities": [["walking"]], "t_range": [0, 120], "tier": "identification"}
+{"question": "What was the user doing in the final five minutes?", "op": "identify", "activities": [], "t_range": [6900, 7200], "tier": "identification"}
+{"question": "How many bike rides happened before 30 minutes?", "op": "count", "activities": [["bicycling"]], "t_range": [0, 1800], "tier": "temporal"}

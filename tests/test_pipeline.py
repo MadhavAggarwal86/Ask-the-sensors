@@ -115,3 +115,24 @@ def test_compressed_models_follow_teacher(qa):
     Xn = X.copy()
     Xn[:, [i for i, n in enumerate(names) if n.startswith("gyro")]] = np.nan
     assert all(np.isfinite(s.predict_proba(Xn)).all() for s in (tree, mlp, q))
+
+
+@pytest.mark.parametrize("q,op,acts,rng", [
+    ("How many walks did the user take?", "count", [["walking"]], None),
+    ("How long was the usr walkng?", "duration", [["walking"]], None),
+    ("Was the user waking up?", "verify", [], None),                       # "waking" is not a typo
+    ("Was the user cycling in the first half hour?", "verify", [["bicycling"]], (0, 1800)),
+    ("What was the user doing in the final five minutes?", "identify", [], (6900, 7200)),
+    ("When did the walking start after 20 minutes?", "onset", [["walking"]], (1200, 7200)),
+    ("How long was the longest cycling session?", "longest", [["bicycling"]], None),
+    ("How long was the user walking or running?", "duration", [["walking", "running"]], None),
+])
+def test_parser_hardening(q, op, acts, rng):
+    it = parse(q, duration=7200)
+    assert (it.op, it.activities) == (op, acts) or (op == "verify" and not acts and it.op == "open")
+    assert it.t_range == rng
+
+
+def test_unmeasurable_question_is_refused(qa):
+    ans = qa.ask("What was the user's heart rate?")
+    assert ans.answer == "Cannot be determined from these sensors" and ans.timestamps == "N/A"

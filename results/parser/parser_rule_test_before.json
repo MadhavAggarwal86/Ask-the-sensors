@@ -1,0 +1,14 @@
+{
+  "intent": 0.66,
+  "op": 0.8,
+  "activities": 0.96,
+  "t_range": 0.84,
+  "per_tier": {
+    "identification": 0.5833333333333334,
+    "temporal": 0.5833333333333334,
+    "grounding": 0.8,
+    "open_world": 0.8888888888888888
+  },
+  "latency_ms_mean": 0.09166249947156757,
+  "n": 50
+}

@@ -163,6 +163,9 @@ def onset(intent: Intent, tl: Timeline) -> Answer:
             lead = (f"The preceding interval ({p.start:.0f} to {p.end:.0f} s) was {C.DISPLAY[p.activity].lower()} with "
                     f"{ps['acc_mag_std']:.3f} g variability; at {first.start:.0f} s this changes to "
                     f"{fs['acc_mag_std']:.3f} g, marking the transition.")
+    elif len(tl.starts) and first.start <= tl.starts[0] + 1e-6:
+        lead = (f"{names(group)} is already under way in the first analysed window, so it began at or before "
+                f"the start of the recording; {first.start:.0f} s is the earliest time the sensors can confirm.")
     return _grounded(tl, ans, [first], first.activity, lead)
 
 
@@ -223,7 +226,8 @@ BEHAVIORS = [
      ("standing_moving", "walking", "standing_in_place"), "light"),
     (("shopping", "store", "market"), "Shopping", ("walking", "standing_moving", "standing_in_place"), "light"),
     (("hike", "hiking"), "Hiking", ("walking",), "sustained"),
-    (("unsteady", "fall", "stumble", "balance", "dizzy", "trip over"), "Unsteadiness or possible fall", None, "spikes"),
+    (("unsteady", "fall", "fell", "stumbl", "balance", "dizzy", "trip over", "tripped", "collaps"),
+     "Unsteadiness or possible fall", None, "spikes"),
 ]
 
 
@@ -231,8 +235,20 @@ def _intensity(std: float) -> str:
     return "still" if std < 0.02 else "light" if std < 0.1 else "moderate" if std < 0.35 else "vigorous"
 
 
+# Quantities that motion sensors cannot observe. Answering them would mean inventing evidence.
+UNMEASURABLE = {"heart": "heart rate", "pulse": "heart rate", "blood": "blood pressure or chemistry",
+                "temperature": "temperature", "calorie": "energy expenditure", "location": "location",
+                "gps": "location", "weather": "weather", "mood": "mood", "stress": "stress level",
+                "emotion": "emotional state", "speak": "speech", "talk": "speech", "audio": "sound"}
+
+
 def open_world(intent: Intent, tl: Timeline) -> Answer:
     q = intent.question.lower()
+    missing = next((v for k, v in UNMEASURABLE.items() if k in q), None)
+    if missing:
+        return Answer("Cannot be determined from these sensors", "N/A", value=None,
+                      explanation=f"The recording holds only accelerometer and gyroscope signals; {missing} is "
+                                  "not measured, so no sensor evidence can support an answer.")
     match = next((b for b in BEHAVIORS if any(k in q for k in b[0])), None)
     analysed = _analysed(tl, intent.t_range)
     if analysed == 0:
@@ -285,10 +301,19 @@ def open_world(intent: Intent, tl: Timeline) -> Answer:
     return _grounded(tl, ans, top_ivs, top, lead)
 
 
+POST_STILL_G = 0.03      # median variability below this after an impact = the user stopped moving
+TILT_CHANGE_DEG = 45.0   # device orientation change across an impact that suggests ending up in a new posture
+
+
 def _spikes(intent: Intent, tl: Timeline, label: str) -> Answer:
-    """Look for abrupt high-acceleration events, the signature of a stumble or fall."""
-    names_ = tl.feature_names
-    jerk, peak = tl.features[:, names_.index("acc_jerk")], tl.features[:, names_.index("acc_mag_max")]
+    """Look for falls: an abrupt high-acceleration impact FOLLOWED by stillness or a new orientation.
+
+    Sharp impacts alone also occur in hard footstrikes or bumps; those keep the movement going with
+    the same device orientation, so they are reported but not called falls.
+    """
+    f = dict(zip(tl.feature_names, tl.features.T))
+    jerk, peak, std = f["acc_jerk"], f["acc_mag_max"], f["acc_mag_std"]
+    grav = np.column_stack([f["acc_x_mean"], f["acc_y_mean"], f["acc_z_mean"]])
     sel = np.ones(len(tl.starts), bool) if intent.t_range is None else \
         (tl.starts + C.WIN_S > intent.t_range[0]) & (tl.starts < intent.t_range[1])
     med = np.nanmedian(jerk[sel]) if sel.any() else 0
@@ -299,9 +324,34 @@ def _spikes(intent: Intent, tl: Timeline, label: str) -> Answer:
                       explanation=f"No window{_where(intent)} combines a peak above 2 g with a jerk far above the "
                                   f"recording's typical level ({med:.2f} g/s), so there is no signal sign of a "
                                   f"stumble or fall.")
+    falls, details = [], []
+    for i in hits:
+        t = tl.starts[i]
+        pre = (tl.starts >= t - 30) & (tl.starts < t)
+        post = (tl.starts > t + C.WIN_S / 2) & (tl.starts <= t + 60)
+        if not pre.any() or not post.any():
+            continue
+        g0, g1 = np.nanmean(grav[pre], 0), np.nanmean(grav[post], 0)
+        cos = np.dot(g0, g1) / (np.linalg.norm(g0) * np.linalg.norm(g1) + 1e-9)
+        tilt = float(np.degrees(np.arccos(np.clip(cos, -1, 1))))
+        still = float(np.nanmedian(std[post]))
+        details.append((i, tilt, still))
+        if still < POST_STILL_G or tilt > TILT_CHANGE_DEG:
+            falls.append((i, tilt, still))
+    if falls:
+        ivs = [Interval(float(tl.starts[i]), float(tl.starts[i] + C.WIN_S), "event", 1.0, np.array([i]))
+               for i, _, _ in falls]
+        ans = Answer(f"Yes, {len(falls)} possible fall(s)", label, value=True)
+        i, tilt, still = max(falls, key=lambda x: peak[x[0]])
+        lead = (f"{len(falls)} impact(s) with peaks above 2 g are followed by a fall signature; the strongest "
+                f"({peak[i]:.2f} g, jerk {jerk[i]:.1f} g/s against a typical {med:.2f} g/s) is followed by "
+                f"{still:.3f} g variability and a {tilt:.0f} degree change in device orientation.")
+        return _grounded(tl, ans, ivs[:10], None, lead)
     ivs = [Interval(float(tl.starts[i]), float(tl.starts[i] + C.WIN_S), "event", 1.0, np.array([i])) for i in hits]
-    ans = Answer(f"Yes, {len(hits)} abrupt event(s)", label, value=True)
-    lead = (f"{len(hits)} window(s) show peaks above 2 g (max {peak[hits].max():.2f} g) with jerk up to "
-            f"{jerk[hits].max():.1f} g/s against a typical {med:.2f} g/s; such sharp transients are consistent "
-            f"with a stumble, a fall or a sudden impact.")
+    ans = Answer("No fall signature", label, value=False)
+    after = (f" afterwards movement continued (median {np.median([d[2] for d in details]):.3f} g variability) and "
+             f"the device orientation changed by at most {max(d[1] for d in details):.0f} degrees") if details else ""
+    lead = (f"{len(hits)} sharp impact(s) reach {peak[hits].max():.2f} g with jerk up to {jerk[hits].max():.1f} g/s "
+            f"(typical {med:.2f} g/s), but{after or ' there is too little data around them to judge'}; this points "
+            f"to hard footstrikes or bumps rather than a fall.")
     return _grounded(tl, ans, ivs[:10], None, lead)
