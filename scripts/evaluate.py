@@ -106,14 +106,19 @@ def main():
     gp = [M.overlap_fraction(r["pred"].intervals, r["ref"].intervals) for r in records
           if r["pred"].intervals and r["qtype"] in ("duration", "grounding")]
     sc["grounding_precision"] = float(np.nanmean(gp)) if gp else None
+    sc["answer_metrics"] = M.answer_metrics(records)
     sc["recordings"] = len(items)
     print(json.dumps(sc, indent=2))
     (out / f"qa_metrics_{tag}.json").write_text(json.dumps(sc, indent=2))
     with open(out / f"qa_records_{tag}.jsonl", "w") as f:
         for r in records:
+            p, ref = r["pred"], r["ref"]
             f.write(json.dumps({"rec": r["rec"], "qtype": r["qtype"], "question": r["question"],
-                                "pred": r["pred"].answer, "ref": r["ref"].answer, "correct": r["correct"],
-                                "grounded": r["grounded"]}) + "\n")
+                                "pred": p.answer, "ref": ref.answer, "correct": r["correct"],
+                                "grounded": r["grounded"], "pred_activity": p.activity,
+                                "pred_timestamps": p.timestamps, "pred_modality": p.modality,
+                                "pred_channels": p.channels, "pred_explanation": p.explanation,
+                                "ref_activity": ref.activity, "ref_timestamps": ref.timestamps}) + "\n")
     with open(out / f"sample_answers_{tag}.txt", "w") as f:
         seen = set()
         for r in records:

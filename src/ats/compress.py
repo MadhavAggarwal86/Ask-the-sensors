@@ -137,3 +137,23 @@ class Int8MLP:
             if i < len(self.layers) - 1:
                 A = np.maximum(A, 0)
         return _softmax(A)
+
+
+def n_params(clf) -> int:
+    """Learned numbers in a classifier: split thresholds + leaf values for trees, weights + biases +
+    input-scaler statistics for the MLPs. Feature indices and tree structure are not counted."""
+    if isinstance(clf, (MLPStudent, Int8MLP)):
+        prep = clf.prep.scale.size + clf.prep.mean.size + clf.prep.std.size
+        if isinstance(clf, MLPStudent):
+            return prep + sum(W.size + b.size for W, b in clf.weights)
+        return prep + sum(Wq.size + bq.size + s_w.size + 1 for _, _, _, Wq, s_w, bq in clf.layers)
+    if isinstance(clf, TreeStudent):
+        t = clf.tree.tree_
+        leaves = int((t.children_left == -1).sum())
+        return (t.node_count - leaves) + leaves * t.value.shape[1]
+    total = 0                                                   # HistGradientBoostingClassifier
+    for round_ in clf._predictors:
+        for tree in round_:
+            leaves = int(tree.nodes["is_leaf"].sum())
+            total += (len(tree.nodes) - leaves) + leaves
+    return total + clf._baseline_prediction.size

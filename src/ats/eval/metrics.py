@@ -83,3 +83,61 @@ def score(records: list[dict]) -> dict:
     return {"per_type": per, "overall_macro": float(np.mean(list(per.values()))) if per else 0.0,
             "grounded_per_type": gper, "grounded_macro": float(np.mean(list(gper.values()))) if gper else 0.0,
             "n": len(records)}
+
+
+BINARY_TYPES = ("verification", "prolonged")
+CATEGORICAL_TYPES = ("identification", "comparison", "open_world")
+
+
+def _binary(pairs) -> dict:
+    """pairs: (predicted, reference) booleans. Precision/recall/F1 on 'yes' plus specificity."""
+    tp = sum(p and r for p, r in pairs)
+    fp = sum(p and not r for p, r in pairs)
+    fn = sum(r and not p for p, r in pairs)
+    tn = sum(not p and not r for p, r in pairs)
+    prec = tp / (tp + fp) if tp + fp else None
+    rec = tp / (tp + fn) if tp + fn else None
+    f1 = 2 * prec * rec / (prec + rec) if tp else 0.0  # tp > 0 implies prec and rec are defined
+    return {"n": len(pairs), "positives": tp + fn, "precision": prec, "recall": rec, "f1": f1,
+            "specificity": tn / (tn + fp) if tn + fp else None,
+            "accuracy": (tp + tn) / len(pairs) if pairs else None}
+
+
+def _categorical(pairs) -> dict:
+    """pairs: (predicted, reference) labels. Macro-F1 and balanced accuracy over reference classes."""
+    from sklearn.metrics import balanced_accuracy_score, f1_score
+    p, r = [str(a) for a, _ in pairs], [str(b) for _, b in pairs]
+    return {"n": len(pairs), "classes": len(set(r)), "accuracy": float(np.mean([a == b for a, b in zip(p, r)])),
+            "macro_f1": float(f1_score(r, p, labels=sorted(set(r)), average="macro", zero_division=0)),
+            "balanced_accuracy": float(balanced_accuracy_score(r, p))}
+
+
+def answer_metrics(records: list[dict]) -> dict:
+    """The per-kind metrics the brief asks for beside plain accuracy: P/R/F1 and specificity for yes/no
+    answers, macro-F1 and balanced accuracy for categorical answers, MAE (and MAPE) for numbers."""
+    out = {}
+    for t in BINARY_TYPES:
+        pairs = [(bool(r["pred"].value), bool(r["ref"].value)) for r in records if r["qtype"] == t]
+        if pairs:
+            out[t] = _binary(pairs)
+    # onset questions are yes/no first ("did the user begin X?"), then a time
+    pairs = [(r["pred"].value is not None, r["ref"].value is not None) for r in records if r["qtype"] == "grounding"]
+    if pairs:
+        out["grounding_detection"] = _binary(pairs)
+    for t in CATEGORICAL_TYPES:
+        pairs = [(_norm(r["pred"].value), _norm(r["ref"].value)) for r in records if r["qtype"] == t]
+        if pairs:
+            out[t] = _categorical(pairs)
+    for t in ("duration", "count"):
+        pairs = [(r["pred"].value, r["ref"].value) for r in records
+                 if r["qtype"] == t and r["pred"].value is not None and r["ref"].value is not None]
+        if not pairs:
+            continue
+        err = np.array([abs(p - r) for p, r in pairs], float)
+        m = {"n": len(pairs), "mae": float(err.mean()), "median_abs_error": float(np.median(err))}
+        if t == "duration":
+            nz = [(p, r) for p, r in pairs if r > 0]
+            m["mape_pct"] = float(100 * np.mean([abs(p - r) / r for p, r in nz])) if nz else None
+            m["mape_n"] = len(nz)
+        out[t] = m
+    return out

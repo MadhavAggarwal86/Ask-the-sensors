@@ -136,3 +136,18 @@ def test_parser_hardening(q, op, acts, rng):
 def test_unmeasurable_question_is_refused(qa):
     ans = qa.ask("What was the user's heart rate?")
     assert ans.answer == "Cannot be determined from these sensors" and ans.timestamps == "N/A"
+
+
+def test_answer_metrics_and_rubric_parsing():
+    from types import SimpleNamespace as A
+    from ats.eval.metrics import answer_metrics
+    from ats.eval.rubric import parse as parse_scores
+    recs = [{"qtype": "verification", "pred": A(value=p), "ref": A(value=r)}
+            for p, r in [(True, True), (True, False), (False, True), (False, False), (False, False)]]
+    recs += [{"qtype": "count", "pred": A(value=p), "ref": A(value=r)} for p, r in [(3, 1), (2, 2)]]
+    m = answer_metrics(recs)
+    assert m["verification"]["precision"] == 0.5 and m["verification"]["recall"] == 0.5
+    assert abs(m["verification"]["specificity"] - 2 / 3) < 1e-9 and m["count"]["mae"] == 1.0
+    assert parse_scores('```json\n{"features": 4, "support": 2, "plausible": 5}\n```') == \
+        {"features": 4, "support": 2, "plausible": 5}
+    assert parse_scores('{"features": 7, "support": 2, "plausible": 5}') is None

@@ -17,6 +17,10 @@ Cost axes, measured on the stated target:
                     windowing, features, classifier, HMM decoding, parsing, answering
   peak memory       peak Python/NumPy allocation during that query (tracemalloc), model excluded;
                     it is dominated by the recording and its windows, so it barely varies
+  parameters        learned numbers in the classifier (ats.compress.n_params)
+  CPU time / util.  process CPU time of that query, and CPU time / wall time (1.0 = one core busy)
+  energy (estimate) CPU time x CORE_POWER_W. Not a measurement: macOS exposes per-process energy only
+                    through sudo powermetrics, so the column scales linearly with the assumed power
 Target: this laptop's CPU limited to ONE thread (threadpoolctl), to emulate a single-core edge
 device; the CPU model is recorded in efficiency.json.
 """
@@ -36,7 +40,7 @@ from sklearn.metrics import f1_score
 from threadpoolctl import threadpool_limits
 
 from ats import config as C
-from ats.compress import Int8MLP, MLPStudent, TreeStudent, prune_boosting
+from ats.compress import Int8MLP, MLPStudent, TreeStudent, n_params, prune_boosting
 from ats.dataset import held_out_recordings, load_processed, split_users, training_set
 from ats.eval import metrics as M
 from ats.eval.run import ask_generated
@@ -45,6 +49,8 @@ from ats.model import ActivityModel
 from ats.pipeline import SensorQA
 from ats.preprocess import make_windows
 from ats.synthetic import make_recording
+
+CORE_POWER_W = 4.0   # assumed active power of one busy performance core (energy column only)
 
 
 def cached_features(source: str, n: int):
@@ -91,7 +97,8 @@ def bootstrap(records_by_name, n_boot=1000, seed=0):
 
 
 def query_cost(model, rec, acc_only=False, repeats=7):
-    """Single-thread latency (ms) and peak working memory (MB) of one question on a fresh recording."""
+    """Single-thread latency (ms), classifier time (ms), peak working memory (MB) and CPU time (ms)
+    of one question on a fresh recording."""
     if acc_only:
         rec = type(rec)(rec.t, np.where(np.arange(6) < 3, rec.x, np.nan), rec.t0)
     qa = SensorQA(model)
@@ -102,11 +109,12 @@ def query_cost(model, rec, acc_only=False, repeats=7):
 
     with threadpool_limits(1):
         once()                                   # warm-up
-        times = []
+        times, cpu = [], []
         for _ in range(repeats):
-            t = time.perf_counter()
+            t, c = time.perf_counter(), time.process_time()
             once()
             times.append(time.perf_counter() - t)
+            cpu.append(time.process_time() - c)
         starts, wins = make_windows(rec)
         X, names = extract(wins)
         t = time.perf_counter()
@@ -117,7 +125,7 @@ def query_cost(model, rec, acc_only=False, repeats=7):
         once()
         peak = tracemalloc.get_traced_memory()[1]
         tracemalloc.stop()
-    return 1000 * float(np.median(times)), model_ms, peak / 2**20
+    return 1000 * float(np.median(times)), model_ms, peak / 2**20, 1000 * float(np.median(cpu))
 
 
 def build_variants(full, source, split, vdir):
@@ -196,11 +204,34 @@ def plot(rows, path, title):
     plt.close(fig)
 
 
+def cost_fields(model, lat_ms, cpu_ms):
+    return {"n_params": n_params(model.clf), "cpu_ms": cpu_ms, "cpu_util": cpu_ms / lat_ms,
+            "energy_mj_est": cpu_ms * CORE_POWER_W}
+
+
+def costs_only(out, full, vdir, kinds):
+    """Add parameters, CPU time and energy to an existing efficiency.json without re-running the QA
+    (the QA columns and the latency already recorded there are kept)."""
+    path = out / "efficiency.json"
+    eff = json.loads(path.read_text())
+    hour, _ = make_recording([("sitting", 1200), ("walking", 1200), ("lying_down", 1200)], seed=0)
+    for r in eff["rows"]:
+        model = full if r["name"] == "hgb_full" else ActivityModel.load(vdir / f"{r['name']}.joblib")
+        lat, _, _, cpu = query_cost(model, hour, kinds[r["name"]])
+        r.update(cost_fields(model, lat, cpu))
+        print(f"{r['name']:14s} params {r['n_params']:7d}  cpu {cpu:6.1f} ms / wall {lat:6.1f} ms  "
+              f"util {r['cpu_util']:.2f}  energy ~{r['energy_mj_est']:.0f} mJ")
+    eff["energy_assumption"] = f"CPU time x {CORE_POWER_W} W (estimate, not measured)"
+    path.write_text(json.dumps(eff, indent=2))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--source", choices=["extrasensory", "synthetic"], default="extrasensory")
     ap.add_argument("--max-recordings", type=int, default=40)
     ap.add_argument("--reuse-variants", action="store_true", help="load models/variants/* instead of retraining")
+    ap.add_argument("--costs-only", action="store_true",
+                    help="only add parameters, CPU time and energy to the existing efficiency.json")
     args = ap.parse_args()
     out = C.RESULTS_DIR / args.source
     vdir = C.MODELS_DIR / "variants"
@@ -211,6 +242,8 @@ def main():
     split = split_users(args.source)
     kinds = {"hgb_full": False, "hgb_pruned_100": False, "hgb_pruned_30": False, "hgb_pruned_10": False,
              "hgb_acc_only": True, "tree_d10": False, "tree_d6": False, "mlp_fp32": False, "mlp_int8": False}
+    if args.costs_only:
+        return costs_only(out, full, vdir, kinds)
     if args.reuse_variants:
         variants = {n: (full if n == "hgb_full" else ActivityModel.load(vdir / f"{n}.joblib"), a)
                     for n, a in kinds.items()}
@@ -228,13 +261,13 @@ def main():
         records[name] = qa_records(model, cache, acc_only)
         sc = M.score(records[name])
         pred = model.predict_proba(Xte, names).argmax(1)
-        lat, model_ms, peak = query_cost(model, hour, acc_only)
+        lat, model_ms, peak, cpu_ms = query_cost(model, hour, acc_only)
         rows.append({"name": name, "acc_only": acc_only, "size_mb": path.stat().st_size / 2**20,
                      "latency_ms": lat, "classifier_ms": model_ms, "peak_mem_mb": peak,
                      "qa_overall": sc["overall_macro"], "qa_grounded": sc["grounded_macro"],
                      "window_macro_f1": float(f1_score(yte, pred, labels=range(len(C.CLASSES)),
                                                        average="macro", zero_division=0)),
-                     "per_type": sc["per_type"]})
+                     "per_type": sc["per_type"], **cost_fields(model, lat, cpu_ms)})
         r = rows[-1]
         print(f"{name:14s} size {r['size_mb']:8.3f} MB  query {lat:6.1f} ms  (classifier {model_ms:6.2f} ms)  "
               f"peak {peak:5.1f} MB  QA {r['qa_overall']:.3f}  grounded {r['qa_grounded']:.3f}  "
@@ -252,6 +285,7 @@ def main():
     target = f"{cpu or platform.processor()}, 1 thread, Python {platform.python_version()}"
     (out / "efficiency.json").write_text(json.dumps({"target": target, "recordings": len(cache),
                                                      "query": "1 question on a fresh 1-hour 25 Hz recording",
+                                                     "energy_assumption": f"CPU time x {CORE_POWER_W} W (estimate, not measured)",
                                                      "rows": rows}, indent=2))
     plot(rows, out / "fig4_accuracy_vs_overhead.png",
          f"Accuracy vs overhead ({len(cache)} held-out recordings; target: {target})")

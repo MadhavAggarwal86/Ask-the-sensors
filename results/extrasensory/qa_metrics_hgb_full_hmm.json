@@ -22,8 +22,70 @@
   },
   "grounded_macro": 0.47481878259838783,
   "n": 767,
-  "latency_ms_mean": 0.49871604065010094,
+  "latency_ms_mean": 0.44176596835513043,
   "duration_mae_s": 1055.5,
   "grounding_precision": 0.44773850796156067,
+  "answer_metrics": {
+    "verification": {
+      "n": 150,
+      "positives": 75,
+      "precision": 0.8823529411764706,
+      "recall": 0.6,
+      "f1": 0.7142857142857143,
+      "specificity": 0.92,
+      "accuracy": 0.76
+    },
+    "prolonged": {
+      "n": 80,
+      "positives": 25,
+      "precision": 0.696969696969697,
+      "recall": 0.92,
+      "f1": 0.793103448275862,
+      "specificity": 0.8181818181818182,
+      "accuracy": 0.85
+    },
+    "grounding_detection": {
+      "n": 74,
+      "positives": 74,
+      "precision": 1.0,
+      "recall": 0.8243243243243243,
+      "f1": 0.9037037037037037,
+      "specificity": null,
+      "accuracy": 0.8243243243243243
+    },
+    "identification": {
+      "n": 75,
+      "classes": 4,
+      "accuracy": 0.56,
+      "macro_f1": 0.482628706419029,
+      "balanced_accuracy": 0.46500333548030914
+    },
+    "comparison": {
+      "n": 80,
+      "classes": 6,
+      "accuracy": 0.9,
+      "macro_f1": 0.854378213339721,
+      "balanced_accuracy": 0.8342330322933771
+    },
+    "open_world": {
+      "n": 80,
+      "classes": 3,
+      "accuracy": 0.7625,
+      "macro_f1": 0.6690399137001078,
+      "balanced_accuracy": 0.6884615384615383
+    },
+    "duration": {
+      "n": 114,
+      "mae": 1055.5,
+      "median_abs_error": 162.5,
+      "mape_pct": 94.81140981584511,
+      "mape_n": 74
+    },
+    "count": {
+      "n": 114,
+      "mae": 4.87719298245614,
+      "median_abs_error": 1.0
+    }
+  },
   "recordings": 40
 }
