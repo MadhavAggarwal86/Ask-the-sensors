@@ -127,6 +127,12 @@ accuracy is the fraction correct per type, macro-averaged over types:
 
 : Scoring rules. The last row is the stricter "with evidence" score.
 
+Beside these accuracies we report the per-kind metrics the brief asks for (Section 5.2): precision,
+recall, F1 and specificity for yes/no answers; macro-F1 and balanced accuracy for categorical
+answers; mean and median absolute error for durations and counts; and grounding precision, the
+share of cited time that the ground-truth labels confirm. Explanations are graded separately with a
+fixed 1–5 rubric (Section 5.7).
+
 # 3. System design
 
 ![System architecture. Every quantitative statement in an answer is read off the timeline.](figures/fig0_architecture.png){width=100%}
@@ -272,11 +278,12 @@ The code is a Python package (`src/ats/`) with one module per layer, plus script
 | QA evaluation, Figures 1, 3, 5 | `scripts/evaluate.py --robustness` | metrics, records, figures |
 | Efficiency, Figure 4 | `scripts/benchmark.py` | `efficiency.json`, figure |
 | Parser evaluation | `scripts/eval_parser.py` | intent accuracy per set |
+| Explanation rubric | `scripts/grade_explanations.py sheet` / `agree` | grading sheets, agreement |
 | Answer questions | `scripts/answer.py --recording r.csv --questions q.txt` | 6-field answers |
 
 All randomness is seeded: the user split is stored in `configs/split.json`, question sampling is
 seeded by a CRC32 hash of the recording id (Python's `hash()` is salted per process), and models use
-fixed random states. A test suite of 24 checks (`pytest`) exercises every layer on synthetic
+fixed random states. A test suite of 25 checks (`pytest`) exercises every layer on synthetic
 signals, which are used only for testing and never reported as results. The runnable system reads
 any CSV with a time column and accelerometer (optionally gyroscope) columns, with loose column-name
 matching; a 4.4-hour recording is loaded and 11 questions answered in about 2 s on a laptop.
@@ -315,7 +322,7 @@ running).
 
 ## 5.2 Question answering
 
-![Figure 1. QA accuracy by question type on 767 questions over 40 held-out recordings, with the correctness rule under each type. Blue: answer correct; orange: answer correct and evidence grounded.](../results/extrasensory/fig1_accuracy_by_type_hgb_full_hmm.png){width=100%}
+![Figure 1. QA accuracy by question type on 767 questions over 40 held-out recordings, with the correctness rule under each type. Blue: answer correct; orange: answer correct and evidence grounded.](../results/extrasensory/fig1_accuracy_by_type_hgb_full_hmm.png){width=88%}
 
 | Question type | Moving average | **HMM** | Grounded, MA | **Grounded, HMM** |
 |---|---:|---:|---:|---:|
@@ -340,9 +347,31 @@ verdict can be right while the cited intervals overlap the reference only partly
 improved every type and cut the mean duration error from 1,600 s to 1,056 s; it did not change the
 classifier at all.
 
+| Answer kind | Metric | Value |
+|---|---|---|
+| Verification (yes/no, n = 150) | precision / recall / F1 on "yes"; specificity | 0.88 / 0.60 / 0.71; 0.92 |
+| Prolonged (yes/no, n = 80) | precision / recall / F1 on "yes"; specificity | 0.70 / 0.92 / 0.79; 0.82 |
+| Onset detected (n = 74, all present) | recall ("yes" when the activity starts) | 0.82 |
+| Identification (4 classes, n = 75) | macro-F1 / balanced accuracy | 0.48 / 0.47 |
+| Comparison (6 winners, n = 80) | macro-F1 / balanced accuracy | 0.85 / 0.83 |
+| Open-world (3 verdicts, n = 80) | macro-F1 / balanced accuracy | 0.67 / 0.69 |
+| Duration (n = 114) | mean / median absolute error; MAPE (74 non-zero refs) | 1,056 s / 163 s; 95% |
+| Count (n = 114) | mean / median absolute error | 4.9 / 1.0 bouts |
+| Cited evidence (duration, onset) | grounding precision | 0.45 |
+
+: Answer-level metrics beside plain accuracy (same 767 questions).
+
+These metrics expose two biases that accuracy hides. Verification leans towards "no" (specificity
+0.92, recall 0.60): when the asked-about activity is present, the system misses it in 40% of cases,
+mostly under-recognised postures. Prolonged questions lean the other way (recall 0.92, precision
+0.70): a long still stretch is sometimes over-merged into one bout. The numeric errors are
+heavy-tailed: the typical duration error is 163 s and the typical count error one bout, but a few long
+recordings in which a whole posture is mislabelled (sitting as lying) push the mean to 1,056 s.
+MAPE is inflated by references of a few minutes, where any error is a large percentage.
+
 ## 5.3 Accuracy versus strictness
 
-![Figure 3. Left: share of duration answers accepted as the relative-error tolerance grows. Right: share of cited intervals accepted as the IoU threshold grows.](../results/extrasensory/fig3_strictness_hgb_full_hmm.png){width=100%}
+![Figure 3. Left: share of duration answers accepted as the relative-error tolerance grows. Right: share of cited intervals accepted as the IoU threshold grows.](../results/extrasensory/fig3_strictness_hgb_full_hmm.png){width=80%}
 
 Figure 3 shows whether misses are near or wild. Duration acceptance grows steadily with the
 tolerance, so many misses are moderate rather than catastrophic. For onsets, the yes/no part is
@@ -353,7 +382,7 @@ starts at the very beginning of a recording that the reference begins later.
 
 ## 5.4 Robustness
 
-![Figure 5. Overall QA accuracy on a fixed set of 10 recordings as the input is degraded.](../results/extrasensory/fig5_robustness_hgb_full_hmm.png){width=100%}
+![Figure 5. Overall QA accuracy on a fixed set of 10 recordings as the input is degraded.](../results/extrasensory/fig5_robustness_hgb_full_hmm.png){width=85%}
 
 | Degradation | Levels → overall QA accuracy |
 |---|---|
@@ -410,14 +439,41 @@ Typical remaining errors, from the evaluation records:
   activity is detected in the first minutes of the recording, where the self-reported label starts
   later.
 
+## 5.7 Explanation quality
+
+The brief asks for explanations to be graded 1–5 on whether they cite real signal features
+(*features*), whether those features support the conclusion (*support*) and whether the conclusion
+is plausible (*plausible*). The rubric, with anchors for 1, 3 and 5, is fixed in
+`src/ats/eval/rubric.py` and shown identically to human and model graders. A seeded, stratified
+sample of 60 answers (20 each of open-world, prolonged and onset) is exported as one sheet per grader,
+and `grade_explanations.py agree` reports quadratic-weighted Cohen's κ and ±1 agreement between them.
+
+**A small language model is not a usable judge here.** We piloted Qwen2.5-1.5B-Instruct as the
+judge (bfloat16, CPU; the Apple GPU backend crashed on this OS). On the 3 pilot items it gave 5/5/5
+to every answer, although all three answers were wrong, and it took about 160 s per item on the
+8 GB laptop, so 60 items would take hours and the scores would not discriminate. We therefore do
+not report LLM-judge scores. **Human grading:** [to be completed by the group: mean rubric score per
+criterion from two graders over the 60 items, and their weighted κ, from
+`results/extrasensory/rubric/`.]
+
+By construction, every number an explanation quotes (variability in g, cadence in Hz, rotation in
+rad/s, tilt in degrees, bout lengths) is computed from the cited windows, so the *features* criterion
+checks presentation rather than truthfulness; the substantive question is *support* and
+*plausible*, which follow the answer's correctness.
+
 # 6. Efficiency and the accuracy-versus-overhead tradeoff
 
 **Target.** Apple M2 laptop CPU restricted to a single thread (via `threadpoolctl`) to emulate a
 single-core edge device; Python 3.14, NumPy and scikit-learn. **Costs.** Model size is the bytes of
 the serialised model file. Single-query latency is the time to answer one question about a fresh
 1-hour, 25 Hz recording end to end (windowing, features, classifier, decoding, parsing, answering),
-median of 7 runs. We also report the classifier's share. **Accuracy** is the overall QA accuracy on
-the same 767 questions, through the full pipeline.
+median of 7 runs. We also report the classifier's share, the number of learned parameters (split
+thresholds and leaf values for trees; weights, biases and input-scaler statistics for MLPs), and
+the CPU time per query. CPU utilisation (CPU time / wall time) is 0.98–1.00 for every
+configuration, i.e. one core fully busy. Energy per query is an **estimate**, CPU time × 4 W
+(assumed active power of one performance core), because macOS exposes per-process energy only
+through privileged `powermetrics`; it scales linearly with that assumption. **Accuracy** is the
+overall QA accuracy on the same 767 questions, through the full pipeline.
 
 We compare nine configurations: the deployed model; **pruning** (keeping the first 100, 30 or 10
 boosting rounds); **distillation** of the full model's class probabilities into one regression tree
@@ -428,19 +484,19 @@ retrained without gyroscope features, so the gyroscope can stay switched off.
 
 ![Figure 4. Accuracy versus model size, classifier time and end-to-end latency. Red: Pareto frontier. Error bars: paired 95% bootstrap interval of the difference to the full model, drawn around each point.](../results/extrasensory/fig4_accuracy_vs_overhead.png){width=100%}
 
-| Configuration | Size | Classifier, 1 h | Query, 1 h | QA acc. | Δ vs full (95% CI) |
-|---|---:|---:|---:|---:|---|
-| HGB full (deployed) | 7.32 MB | 49.6 ms | 94.0 ms | 0.636 | — |
-| HGB pruned to 100 rounds | 2.49 MB | 19.1 ms | 65.0 ms | 0.628 | −0.024 to +0.006 |
-| HGB pruned to 30 rounds | 0.80 MB | 6.7 ms | 54.2 ms | 0.619 | −0.047 to +0.009 |
-| HGB pruned to 10 rounds | 0.32 MB | 2.2 ms | 50.6 ms | 0.609 | −0.065 to +0.009 |
-| HGB accelerometer only | 7.30 MB | 42.3 ms | 90.0 ms | 0.629 | −0.025 to +0.010 |
-| Distilled tree, depth 10 | 0.14 MB | 0.11 ms | 43.3 ms | 0.628 | −0.041 to +0.021 |
-| Distilled tree, depth 6 | 0.019 MB | 0.11 ms | 43.0 ms | 0.592 | −0.081 to −0.005 |
-| Distilled MLP, float32 | 0.056 MB | 0.53 ms | 43.7 ms | 0.654 | −0.002 to +0.040 |
-| **Distilled MLP, int8** | **0.019 MB** | **1.24 ms** | **46.0 ms** | **0.633** | **−0.020 to +0.017** |
+| Configuration | Params | Size | Classifier, 1 h | Query, 1 h | Energy (est.) | QA acc. | Δ vs full (95% CI) |
+|---|---:|---:|---:|---:|---:|---:|---|
+| HGB full (deployed) | 128,107 | 7.32 MB | 49.6 ms | 94.0 ms | 367 mJ | 0.636 | — |
+| HGB pruned to 100 rounds | 42,707 | 2.49 MB | 19.1 ms | 65.0 ms | 276 mJ | 0.628 | −0.024 to +0.006 |
+| HGB pruned to 30 rounds | 12,817 | 0.80 MB | 6.7 ms | 54.2 ms | 220 mJ | 0.619 | −0.047 to +0.009 |
+| HGB pruned to 10 rounds | 4,277 | 0.32 MB | 2.2 ms | 50.6 ms | 183 mJ | 0.609 | −0.065 to +0.009 |
+| HGB accelerometer only | 128,107 | 7.30 MB | 42.3 ms | 90.0 ms | 335 mJ | 0.629 | −0.025 to +0.010 |
+| Distilled tree, depth 10 | 4,775 | 0.14 MB | 0.11 ms | 43.3 ms | 173 mJ | 0.628 | −0.041 to +0.021 |
+| Distilled tree, depth 6 | 511 | 0.019 MB | 0.11 ms | 43.0 ms | 180 mJ | 0.592 | −0.081 to −0.005 |
+| Distilled MLP, float32 | 13,552 | 0.056 MB | 0.53 ms | 43.7 ms | 173 mJ | 0.654 | −0.002 to +0.040 |
+| **Distilled MLP, int8** | **13,754** | **0.019 MB** | **1.24 ms** | **46.0 ms** | **178 mJ** | **0.633** | **−0.020 to +0.017** |
 
-: Efficiency results. Peak working memory is ~20 MB for every configuration (dominated by the recording, not the model).
+: Efficiency results. Peak working memory is ~20 MB for every configuration (dominated by the recording, not the model). Energy: CPU time × 4 W, an estimate (CPU time measured in a separate pass of the same query).
 
 The three compression techniques behave differently. Pruning trades accuracy away smoothly.
 Distillation keeps nearly all of it: the float MLP even scores slightly above its teacher, but its
@@ -468,6 +524,8 @@ gain on this machine is size, and a speed gain requires int8-capable hardware.
   explanations, and our analysis suggests label noise rather than model capacity is the bottleneck.
 - **Onset precision.** Onsets are often found minutes from the reference. A dedicated change-point
   refinement around the decoded transition could tighten them.
+- **Explanation grading.** The rubric scores need human graders; a 1.5B model judge on this
+  hardware was too slow and did not discriminate right from wrong answers (Section 5.7).
 - **Question coverage.** The generated questions use templates, and the hand-written sets were
   written by the authors. The hidden questions will contain phrasings neither set anticipates; the
   hybrid parser is the mitigation.

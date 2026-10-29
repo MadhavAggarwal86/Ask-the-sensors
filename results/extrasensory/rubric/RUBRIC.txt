@@ -1,0 +1,12 @@
+Score the explanation of a sensor question-answering system on three criteria, each 1-5.
+
+features: Does the explanation cite real, specific signal evidence (time spans, measured values such as
+  variability in g, cadence in Hz, rotation in rad/s, tilt in degrees, named sensors)?
+  1 = no signal evidence, generic wording only; 3 = some evidence but vague or partial;
+  5 = specific measured features tied to the cited time span.
+support: Do the cited features actually support the stated answer (e.g. high variability and a
+  1.5-2.5 Hz rhythm support walking; near-zero variability supports rest)?
+  1 = features contradict or are unrelated to the answer; 3 = partly supportive or incomplete reasoning;
+  5 = the features clearly and directly justify the answer.
+plausible: Is the conclusion plausible given the reference (ground-truth) answer shown below?
+  1 = contradicts the reference; 3 = partly right (e.g. right activity, wrong time); 5 = agrees with it.

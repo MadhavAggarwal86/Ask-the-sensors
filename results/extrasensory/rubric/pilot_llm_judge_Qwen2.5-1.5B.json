@@ -1,0 +1,64 @@
+{
+  "summary": {
+    "judge": "Qwen/Qwen2.5-1.5B-Instruct",
+    "items": 3,
+    "valid": 3,
+    "seconds": 478.61711125000147,
+    "mean": {
+      "features": 5.0,
+      "support": 5.0,
+      "plausible": 5.0
+    },
+    "mean_overall": 5.0,
+    "by_type": {
+      "open_world": {
+        "features": 5.0,
+        "support": 5.0,
+        "plausible": 5.0
+      },
+      "prolonged": {
+        "features": 5.0,
+        "support": 5.0,
+        "plausible": 5.0
+      },
+      "grounding": {
+        "features": 5.0,
+        "support": 5.0,
+        "plausible": 5.0
+      }
+    },
+    "by_answer_correct": {
+      "True": null,
+      "False": 5.0
+    }
+  },
+  "replies": [
+    {
+      "id": "open_world-68",
+      "reply": "```json\n{\"features\": 5, \"support\": 5, \"plausible\": 5}\n```",
+      "scores": {
+        "features": 5,
+        "support": 5,
+        "plausible": 5
+      }
+    },
+    {
+      "id": "prolonged-50",
+      "reply": "```json\n{\"features\": 5, \"support\": 5, \"plausible\": 5}\n```",
+      "scores": {
+        "features": 5,
+        "support": 5,
+        "plausible": 5
+      }
+    },
+    {
+      "id": "grounding-37",
+      "reply": "{\"features\": 5, \"support\": 5, \"plausible\": 5}",
+      "scores": {
+        "features": 5,
+        "support": 5,
+        "plausible": 5
+      }
+    }
+  ]
+}

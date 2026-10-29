@@ -13,7 +13,10 @@ running, bicycling).
 | Overall QA accuracy (macro over 8 question types, 767 questions, 40 recordings) | **0.636** (0.553 before HMM decoding) |
 | Answer correct **and** evidence grounded | **0.475** (0.381 before) |
 | Parser intent accuracy on unseen hand-written questions | **0.96** (rules) vs 0.58 (Qwen2.5-0.5B) |
-| Distilled int8 model vs full model | **380× smaller** (19 KB vs 7.3 MB), accuracy difference −0.020 to +0.017 (95% CI) |
+| Verification (yes/no) precision / recall / specificity | 0.88 / 0.60 / 0.92 |
+| Duration error, median (mean) | 163 s (1,056 s); count error median 1 bout |
+| Distilled int8 model vs full model | **380× smaller** (19 KB vs 7.3 MB, 13.8 k vs 128 k parameters), accuracy difference −0.020 to +0.017 (95% CI) |
+| Cost per query, 1-hour recording, 1 M2 core | 94 ms and ~367 mJ (full) → 46 ms and ~178 mJ (int8); energy estimated as CPU time × 4 W |
 
 Full write-up: [`report/report.md`](report/report.md) (build PDF/Word with `report/build_report.sh`).
 
@@ -68,11 +71,16 @@ python scripts/tune_smoothing.py --source extrasensory
 #    --smoothing moving_average reproduces the first baseline
 python scripts/evaluate.py --source extrasensory --robustness
 
-# 6. Efficiency: pruned / distilled / int8 / accelerometer-only variants, Figure 4 (Pareto front)
+# 6. Efficiency: pruned / distilled / int8 / accelerometer-only variants, Figure 4 (Pareto front);
+#    parameters, CPU time and an energy estimate are included (--costs-only re-measures just those)
 python scripts/benchmark.py --source extrasensory
 
 # 7. Parser generalisation on the hand-written question sets (add --parser llm for the SLM)
 python scripts/eval_parser.py --split both
+
+# 8. Explanation rubric (1-5): one grading sheet per person, then agreement between graders
+python scripts/grade_explanations.py sheet --grader grader_A
+python scripts/grade_explanations.py agree results/extrasensory/rubric/rubric_grader_*.csv
 ```
 
 The user split is fixed in `configs/split.json` (created on first run) so every member gets the same numbers.
@@ -108,7 +116,7 @@ Synthetic signals are crude caricatures used only to test the code. **Never repo
 ```
 src/ats/            library (config, preprocess, features, model, compress, timeline, qa/, eval/)
 scripts/            download, build_dataset, train, tune_smoothing, evaluate, benchmark,
-                    eval_parser, answer, make_synthetic
+                    eval_parser, grade_explanations, answer, make_synthetic
 tests/              pytest checks for every layer
 configs/split.json  fixed train/test users
 eval_sets/          hand-written parser dev/test sets (annotated intents) and demo questions
@@ -126,6 +134,9 @@ models/, results/   outputs (models are not committed)
 - [x] Hand-written question sets (dev/test) and parser hardening; unmeasurable-quantity refusals; fall signature
 - [x] Optional SLM front end (Qwen2.5-0.5B; 1.5B does not fit in 8 GB RAM) emitting the same Intent JSON, validated, rules as fallback
 - [x] Report draft with all five required figures
+- [x] Answer-level metrics (P/R/F1/specificity, macro-F1, MAE), parameter counts, CPU time, energy estimate
+- [x] Explanation rubric and grading sheets (a 1.5B LLM judge was piloted and rejected, see report 5.7)
+- [ ] Group: grade the two rubric sheets in `results/extrasensory/rubric/` and add the scores to report 5.7
 - [ ] Group: fill in names, contribution statement and AI-use disclosure in the report
 - [ ] Future work: noise-augmented training; compact 1D-CNN backbone; onset change-point refinement
 
