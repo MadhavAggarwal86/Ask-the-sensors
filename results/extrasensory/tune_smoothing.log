@@ -1,0 +1,60 @@
+class prior (fit users): {'lying_down': 0.3692, 'sitting': 0.43, 'standing_in_place': 0.0212, 'standing_moving': 0.0962, 'walking': 0.0613, 'running': 0.0037, 'bicycling': 0.0184}
+label cleaning: dropped 20659 motionless motion-class windows (22% of motion-class training windows)
+train windows 377299 (of 1103376)
+validation: 10 users, 185 recordings, 274842 windows
+{'method': 'moving_average', 'macro_f1': 0.3007512702225736, 'count_acc': 0.13733075435203096, 'duration_acc': 0.13152804642166344, 'bouts_pred_per_true': 1.801077441077441, 'objective': 0.18987002366542263}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.304, 'count_acc': 0.145, 'duration_acc': 0.099, 'bouts_pred_per_true': 1.794, 'objective': 0.182}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.318, 'count_acc': 0.211, 'duration_acc': 0.17, 'bouts_pred_per_true': 1.603, 'objective': 0.233}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.266, 'count_acc': 0.28, 'duration_acc': 0.164, 'bouts_pred_per_true': 1.464, 'objective': 0.237}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.307, 'count_acc': 0.17, 'duration_acc': 0.116, 'bouts_pred_per_true': 1.597, 'objective': 0.198}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.24, 'duration_acc': 0.168, 'bouts_pred_per_true': 1.444, 'objective': 0.242}
+{'method': 'hmm', 'tau_s': 15, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.262, 'count_acc': 0.29, 'duration_acc': 0.159, 'bouts_pred_per_true': 1.334, 'objective': 0.237}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.308, 'count_acc': 0.162, 'duration_acc': 0.126, 'bouts_pred_per_true': 1.5, 'objective': 0.199}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.318, 'count_acc': 0.259, 'duration_acc': 0.19, 'bouts_pred_per_true': 1.377, 'objective': 0.256}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.265, 'count_acc': 0.298, 'duration_acc': 0.162, 'bouts_pred_per_true': 1.28, 'objective': 0.242}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.311, 'count_acc': 0.184, 'duration_acc': 0.128, 'bouts_pred_per_true': 1.336, 'objective': 0.208}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.267, 'duration_acc': 0.174, 'bouts_pred_per_true': 1.252, 'objective': 0.253}
+{'method': 'hmm', 'tau_s': 30, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.261, 'count_acc': 0.306, 'duration_acc': 0.159, 'bouts_pred_per_true': 1.163, 'objective': 0.242}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.316, 'count_acc': 0.195, 'duration_acc': 0.13, 'bouts_pred_per_true': 1.261, 'objective': 0.214}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.288, 'duration_acc': 0.19, 'bouts_pred_per_true': 1.202, 'objective': 0.266}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.265, 'count_acc': 0.306, 'duration_acc': 0.162, 'bouts_pred_per_true': 1.106, 'objective': 0.244}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.319, 'count_acc': 0.228, 'duration_acc': 0.135, 'bouts_pred_per_true': 1.13, 'objective': 0.227}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.32, 'count_acc': 0.308, 'duration_acc': 0.174, 'bouts_pred_per_true': 1.101, 'objective': 0.267}
+{'method': 'hmm', 'tau_s': 60, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.26, 'count_acc': 0.311, 'duration_acc': 0.157, 'bouts_pred_per_true': 1.034, 'objective': 0.243}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.32, 'count_acc': 0.221, 'duration_acc': 0.143, 'bouts_pred_per_true': 1.163, 'objective': 0.228}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.32, 'count_acc': 0.306, 'duration_acc': 0.188, 'bouts_pred_per_true': 1.12, 'objective': 0.271}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.264, 'count_acc': 0.313, 'duration_acc': 0.157, 'bouts_pred_per_true': 1.045, 'objective': 0.245}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.322, 'count_acc': 0.259, 'duration_acc': 0.145, 'bouts_pred_per_true': 1.049, 'objective': 0.242}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.337, 'duration_acc': 0.176, 'bouts_pred_per_true': 1.037, 'objective': 0.277}
+{'method': 'hmm', 'tau_s': 120, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.262, 'count_acc': 0.313, 'duration_acc': 0.151, 'bouts_pred_per_true': 0.988, 'objective': 0.242}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.323, 'count_acc': 0.267, 'duration_acc': 0.141, 'bouts_pred_per_true': 1.085, 'objective': 0.244}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.317, 'duration_acc': 0.184, 'bouts_pred_per_true': 1.066, 'objective': 0.273}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.263, 'count_acc': 0.331, 'duration_acc': 0.157, 'bouts_pred_per_true': 1.002, 'objective': 0.25}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.324, 'count_acc': 0.282, 'duration_acc': 0.155, 'bouts_pred_per_true': 0.995, 'objective': 0.254}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.369, 'duration_acc': 0.17, 'bouts_pred_per_true': 0.997, 'objective': 0.286}
+{'method': 'hmm', 'tau_s': 300, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.259, 'count_acc': 0.327, 'duration_acc': 0.153, 'bouts_pred_per_true': 0.96, 'objective': 0.246}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.324, 'count_acc': 0.284, 'duration_acc': 0.157, 'bouts_pred_per_true': 1.047, 'objective': 0.255}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.317, 'count_acc': 0.342, 'duration_acc': 0.19, 'bouts_pred_per_true': 1.039, 'objective': 0.283}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.261, 'count_acc': 0.338, 'duration_acc': 0.151, 'bouts_pred_per_true': 0.982, 'objective': 0.25}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.325, 'count_acc': 0.308, 'duration_acc': 0.157, 'bouts_pred_per_true': 0.969, 'objective': 0.263}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.389, 'duration_acc': 0.162, 'bouts_pred_per_true': 0.977, 'objective': 0.29}
+{'method': 'hmm', 'tau_s': 600, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.259, 'count_acc': 0.338, 'duration_acc': 0.153, 'bouts_pred_per_true': 0.945, 'objective': 0.25}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.327, 'count_acc': 0.29, 'duration_acc': 0.164, 'bouts_pred_per_true': 1.019, 'objective': 0.261}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.318, 'count_acc': 0.354, 'duration_acc': 0.18, 'bouts_pred_per_true': 1.015, 'objective': 0.284}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.261, 'count_acc': 0.348, 'duration_acc': 0.153, 'bouts_pred_per_true': 0.966, 'objective': 0.254}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.327, 'count_acc': 0.323, 'duration_acc': 0.166, 'bouts_pred_per_true': 0.953, 'objective': 0.272}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.381, 'duration_acc': 0.161, 'bouts_pred_per_true': 0.963, 'objective': 0.287}
+{'method': 'hmm', 'tau_s': 1200, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.257, 'count_acc': 0.346, 'duration_acc': 0.151, 'bouts_pred_per_true': 0.933, 'objective': 0.252}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.328, 'count_acc': 0.308, 'duration_acc': 0.161, 'bouts_pred_per_true': 1.0, 'objective': 0.265}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.317, 'count_acc': 0.368, 'duration_acc': 0.178, 'bouts_pred_per_true': 0.999, 'objective': 0.288}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.261, 'count_acc': 0.35, 'duration_acc': 0.151, 'bouts_pred_per_true': 0.952, 'objective': 0.254}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.327, 'count_acc': 0.338, 'duration_acc': 0.164, 'bouts_pred_per_true': 0.939, 'objective': 0.277}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.321, 'count_acc': 0.381, 'duration_acc': 0.164, 'bouts_pred_per_true': 0.952, 'objective': 0.289}
+{'method': 'hmm', 'tau_s': 2400, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.257, 'count_acc': 0.344, 'duration_acc': 0.153, 'bouts_pred_per_true': 0.925, 'objective': 0.251}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 1, 'prior_weight': 0.0, 'macro_f1': 0.327, 'count_acc': 0.323, 'duration_acc': 0.166, 'bouts_pred_per_true': 0.981, 'objective': 0.272}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 1, 'prior_weight': 0.5, 'macro_f1': 0.319, 'count_acc': 0.377, 'duration_acc': 0.172, 'bouts_pred_per_true': 0.981, 'objective': 0.289}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 1, 'prior_weight': 1.0, 'macro_f1': 0.261, 'count_acc': 0.348, 'duration_acc': 0.153, 'bouts_pred_per_true': 0.944, 'objective': 0.254}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 5, 'prior_weight': 0.0, 'macro_f1': 0.328, 'count_acc': 0.35, 'duration_acc': 0.162, 'bouts_pred_per_true': 0.925, 'objective': 0.28}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.322, 'count_acc': 0.391, 'duration_acc': 0.161, 'bouts_pred_per_true': 0.941, 'objective': 0.291}
+{'method': 'hmm', 'tau_s': 4800, 'presmooth': 5, 'prior_weight': 1.0, 'macro_f1': 0.257, 'count_acc': 0.342, 'duration_acc': 0.151, 'bouts_pred_per_true': 0.919, 'objective': 0.25}
+best: {'method': 'hmm', 'tau_s': 4800, 'presmooth': 5, 'prior_weight': 0.5, 'macro_f1': 0.32210720273847604, 'count_acc': 0.390715667311412, 'duration_acc': 0.16054158607350097, 'bouts_pred_per_true': 0.9406060606060606, 'objective': 0.291121485374463}

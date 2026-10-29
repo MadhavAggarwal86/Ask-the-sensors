@@ -1,0 +1,20 @@
+caching held-out features ...
+hgb_full       size    7.319 MB  query   94.0 ms  (classifier  49.57 ms)  peak  20.3 MB  QA 0.636  grounded 0.475  window F1 0.301
+hgb_pruned_100 size    2.491 MB  query   65.0 ms  (classifier  19.07 ms)  peak  20.3 MB  QA 0.628  grounded 0.466  window F1 0.293
+hgb_pruned_30  size    0.801 MB  query   54.2 ms  (classifier   6.73 ms)  peak  20.3 MB  QA 0.619  grounded 0.465  window F1 0.287
+hgb_pruned_10  size    0.319 MB  query   50.6 ms  (classifier   2.21 ms)  peak  20.3 MB  QA 0.609  grounded 0.462  window F1 0.283
+hgb_acc_only   size    7.298 MB  query   90.0 ms  (classifier  42.29 ms)  peak  20.3 MB  QA 0.629  grounded 0.477  window F1 0.290
+tree_d10       size    0.141 MB  query   43.3 ms  (classifier   0.11 ms)  peak  20.3 MB  QA 0.628  grounded 0.462  window F1 0.310
+tree_d6        size    0.019 MB  query   43.0 ms  (classifier   0.11 ms)  peak  20.3 MB  QA 0.592  grounded 0.428  window F1 0.268
+mlp_fp32       size    0.056 MB  query   43.7 ms  (classifier   0.53 ms)  peak  20.3 MB  QA 0.654  grounded 0.476  window F1 0.315
+mlp_int8       size    0.019 MB  query   46.0 ms  (classifier   1.24 ms)  peak  20.3 MB  QA 0.633  grounded 0.471  window F1 0.304
+hgb_full       QA 95% CI [0.592, 0.682]  minus hgb_full [+0.000, +0.000]
+hgb_pruned_100 QA 95% CI [0.582, 0.676]  minus hgb_full [-0.024, +0.006]
+hgb_pruned_30  QA 95% CI [0.573, 0.669]  minus hgb_full [-0.047, +0.009]
+hgb_pruned_10  QA 95% CI [0.562, 0.660]  minus hgb_full [-0.065, +0.009]
+hgb_acc_only   QA 95% CI [0.582, 0.680]  minus hgb_full [-0.025, +0.010]
+tree_d10       QA 95% CI [0.584, 0.678]  minus hgb_full [-0.041, +0.021]
+tree_d6        QA 95% CI [0.545, 0.641]  minus hgb_full [-0.081, -0.005]
+mlp_fp32       QA 95% CI [0.610, 0.702]  minus hgb_full [-0.002, +0.040]
+mlp_int8       QA 95% CI [0.591, 0.680]  minus hgb_full [-0.020, +0.017]
+saved /Users/madhavaggarwal/Desktop/mc project/results/extrasensory/fig4_accuracy_vs_overhead.png

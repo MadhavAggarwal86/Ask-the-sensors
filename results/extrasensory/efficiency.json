@@ -1,0 +1,268 @@
+{
+  "target": "Apple M2, 1 thread, Python 3.14.7",
+  "recordings": 40,
+  "query": "1 question on a fresh 1-hour 25 Hz recording",
+  "rows": [
+    {
+      "name": "hgb_full",
+      "acc_only": false,
+      "size_mb": 7.318939208984375,
+      "latency_ms": 93.95075001521036,
+      "classifier_ms": 49.57189871596971,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6355643966334756,
+      "qa_grounded": 0.47481878259838783,
+      "window_macro_f1": 0.30107158475538276,
+      "per_type": {
+        "comparison": 0.9,
+        "count": 0.5701754385964912,
+        "duration": 0.43859649122807015,
+        "grounding": 0.24324324324324326,
+        "identification": 0.56,
+        "open_world": 0.7625,
+        "prolonged": 0.85,
+        "verification": 0.76
+      },
+      "qa_ci95": [
+        0.5918557625602685,
+        0.6818524016109114
+      ],
+      "delta_vs_full_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "hgb_pruned_100",
+      "acc_only": false,
+      "size_mb": 2.4911041259765625,
+      "latency_ms": 64.96745900949463,
+      "classifier_ms": 19.073803572350048,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6276635846372689,
+      "qa_grounded": 0.46551994428639165,
+      "window_macro_f1": 0.29300541888171694,
+      "per_type": {
+        "comparison": 0.8875,
+        "count": 0.5350877192982456,
+        "duration": 0.4298245614035088,
+        "grounding": 0.22972972972972974,
+        "identification": 0.56,
+        "open_world": 0.75,
+        "prolonged": 0.8625,
+        "verification": 0.7666666666666667
+      },
+      "qa_ci95": [
+        0.5823425297007734,
+        0.6759586885169186
+      ],
+      "delta_vs_full_ci95": [
+        -0.024033354656724085,
+        0.005989850181283315
+      ]
+    },
+    {
+      "name": "hgb_pruned_30",
+      "acc_only": false,
+      "size_mb": 0.8013458251953125,
+      "latency_ms": 54.17487499653362,
+      "classifier_ms": 6.725773855578154,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6190786510194405,
+      "qa_grounded": 0.4649119843527738,
+      "window_macro_f1": 0.28666223708814226,
+      "per_type": {
+        "comparison": 0.8875,
+        "count": 0.5175438596491229,
+        "duration": 0.40350877192982454,
+        "grounding": 0.24324324324324326,
+        "identification": 0.5466666666666666,
+        "open_world": 0.7375,
+        "prolonged": 0.85,
+        "verification": 0.7666666666666667
+      },
+      "qa_ci95": [
+        0.573358885801389,
+        0.6685961586052046
+      ],
+      "delta_vs_full_ci95": [
+        -0.04733714794134504,
+        0.009474654356012361
+      ]
+    },
+    {
+      "name": "hgb_pruned_10",
+      "acc_only": false,
+      "size_mb": 0.3185577392578125,
+      "latency_ms": 50.62808399088681,
+      "classifier_ms": 2.2139285699397857,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6089744843527738,
+      "qa_grounded": 0.4622146159317212,
+      "window_macro_f1": 0.2833957382351247,
+      "per_type": {
+        "comparison": 0.8625,
+        "count": 0.5350877192982456,
+        "duration": 0.38596491228070173,
+        "grounding": 0.24324324324324326,
+        "identification": 0.5466666666666666,
+        "open_world": 0.6875,
+        "prolonged": 0.8375,
+        "verification": 0.7733333333333333
+      },
+      "qa_ci95": [
+        0.5622109685996225,
+        0.659535262363944
+      ],
+      "delta_vs_full_ci95": [
+        -0.0647420595078971,
+        0.009199608566322072
+      ]
+    },
+    {
+      "name": "hgb_acc_only",
+      "acc_only": true,
+      "size_mb": 7.297859191894531,
+      "latency_ms": 89.99999999650754,
+      "classifier_ms": 42.2892261412926,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6289854492650546,
+      "qa_grounded": 0.4767486071597914,
+      "window_macro_f1": 0.28964098354705115,
+      "per_type": {
+        "comparison": 0.8875,
+        "count": 0.543859649122807,
+        "duration": 0.41228070175438597,
+        "grounding": 0.24324324324324326,
+        "identification": 0.56,
+        "open_world": 0.7625,
+        "prolonged": 0.8625,
+        "verification": 0.76
+      },
+      "qa_ci95": [
+        0.5822956533268749,
+        0.680007565037076
+      ],
+      "delta_vs_full_ci95": [
+        -0.02539961222316259,
+        0.010272286856214249
+      ]
+    },
+    {
+      "name": "tree_d10",
+      "acc_only": false,
+      "size_mb": 0.1408977508544922,
+      "latency_ms": 43.27408300014213,
+      "classifier_ms": 0.11295228198702846,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6279547475106686,
+      "qa_grounded": 0.4616444404931247,
+      "window_macro_f1": 0.31009178915941893,
+      "per_type": {
+        "comparison": 0.9,
+        "count": 0.5701754385964912,
+        "duration": 0.42105263157894735,
+        "grounding": 0.24324324324324326,
+        "identification": 0.5333333333333333,
+        "open_world": 0.7375,
+        "prolonged": 0.825,
+        "verification": 0.7933333333333333
+      },
+      "qa_ci95": [
+        0.5839979624387213,
+        0.6782172232735555
+      ],
+      "delta_vs_full_ci95": [
+        -0.04130572750275675,
+        0.02135476516275999
+      ]
+    },
+    {
+      "name": "tree_d6",
+      "acc_only": false,
+      "size_mb": 0.018888473510742188,
+      "latency_ms": 42.95504200854339,
+      "classifier_ms": 0.11003571645622807,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.5924546586059745,
+      "qa_grounded": 0.4280796586059744,
+      "window_macro_f1": 0.26775475535800497,
+      "per_type": {
+        "comparison": 0.875,
+        "count": 0.5175438596491229,
+        "duration": 0.3508771929824561,
+        "grounding": 0.21621621621621623,
+        "identification": 0.52,
+        "open_world": 0.6875,
+        "prolonged": 0.8125,
+        "verification": 0.76
+      },
+      "qa_ci95": [
+        0.5454118475860196,
+        0.6412483342807104
+      ],
+      "delta_vs_full_ci95": [
+        -0.08145273154257951,
+        -0.005495049798733835
+      ]
+    },
+    {
+      "name": "mlp_fp32",
+      "acc_only": false,
+      "size_mb": 0.05563831329345703,
+      "latency_ms": 43.69383299490437,
+      "classifier_ms": 0.5323988568436887,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6544508653390233,
+      "qa_grounded": 0.4764684091986724,
+      "window_macro_f1": 0.31483374879498527,
+      "per_type": {
+        "comparison": 0.875,
+        "count": 0.5789473684210527,
+        "duration": 0.43859649122807015,
+        "grounding": 0.22972972972972974,
+        "identification": 0.6133333333333333,
+        "open_world": 0.8125,
+        "prolonged": 0.8875,
+        "verification": 0.8
+      },
+      "qa_ci95": [
+        0.609539496961372,
+        0.7015159479607783
+      ],
+      "delta_vs_full_ci95": [
+        -0.002020152902017896,
+        0.040286585810023354
+      ]
+    },
+    {
+      "name": "mlp_int8",
+      "acc_only": false,
+      "size_mb": 0.01874065399169922,
+      "latency_ms": 45.959124981891364,
+      "classifier_ms": 1.239642858438726,
+      "peak_mem_mb": 20.261387825012207,
+      "qa_overall": 0.6334689129919393,
+      "qa_grounded": 0.4705522463252726,
+      "window_macro_f1": 0.30423500578067175,
+      "per_type": {
+        "comparison": 0.8875,
+        "count": 0.543859649122807,
+        "duration": 0.40350877192982454,
+        "grounding": 0.21621621621621623,
+        "identification": 0.5866666666666667,
+        "open_world": 0.775,
+        "prolonged": 0.875,
+        "verification": 0.78
+      },
+      "qa_ci95": [
+        0.5911106533022652,
+        0.6801383878152227
+      ],
+      "delta_vs_full_ci95": [
+        -0.02016576564068342,
+        0.016978628004651684
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+label cleaning: dropped 27698 motionless motion-class windows (23% of motion-class training windows)
+train windows 487764 (of 1371179)
+test windows 324818
+                   precision    recall  f1-score   support
+
+       lying_down       0.49      0.33      0.40     90605
+          sitting       0.60      0.58      0.59    164166
+standing_in_place       0.03      0.06      0.04      9402
+  standing_moving       0.10      0.16      0.13     24620
+          walking       0.47      0.57      0.52     30659
+          running       0.01      0.01      0.01      1087
+        bicycling       0.34      0.60      0.43      4279
+
+         accuracy                           0.46    324818
+        macro avg       0.29      0.33      0.30    324818
+     weighted avg       0.50      0.46      0.47    324818
+
+smoothed: {'macro_f1': 0.38459032408651633, 'balanced_accuracy': 0.3647606019908006}
+saved /Users/madhavaggarwal/Desktop/mc project/models/hgb_full.joblib and /Users/madhavaggarwal/Desktop/mc project/results/extrasensory

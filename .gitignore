@@ -1,0 +1,9 @@
+# Data is fetched by scripts/download_data.py, never committed
+data/
+models/**/*.joblib
+results/synthetic/
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.DS_Store

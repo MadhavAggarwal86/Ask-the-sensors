@@ -1,0 +1,27 @@
+[Parallel(n_jobs=4)]: Using backend LokyBackend with 4 concurrent workers.
+Traceback (most recent call last):
+  File "/Users/madhavaggarwal/Desktop/mc project/scripts/build_dataset.py", line 27, in <module>
+    main()
+    ~~~~^^
+  File "/Users/madhavaggarwal/Desktop/mc project/scripts/build_dataset.py", line 20, in main
+    counts = Parallel(n_jobs=args.jobs, verbose=5)(delayed(process_user)(args.source, u, out) for u in us)
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 2098, in __call__
+    return output if self.return_generator else list(output)
+                                                ~~~~^^^^^^^^
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 1704, in _get_outputs
+    yield from self._retrieve()
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 1806, in _retrieve
+    self._raise_error_fast()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 1885, in _raise_error_fast
+    error_job.get_result(self.timeout)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 780, in get_result
+    return self._return_or_raise()
+           ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/madhavaggarwal/Desktop/mc project/.venv/lib/python3.14/site-packages/joblib/parallel.py", line 795, in _return_or_raise
+    raise self._result
+joblib.externals.loky.process_executor.TerminatedWorkerError: A worker process managed by the executor was unexpectedly terminated. This could be caused by a segmentation fault while calling the function or by an excessive memory usage causing the Operating System to kill the worker.
+
+The exit codes of the workers are {SIGKILL(-9)}
+Detailed tracebacks of the workers should have been printed to stderr in the executor process if faulthandler was not disabled.

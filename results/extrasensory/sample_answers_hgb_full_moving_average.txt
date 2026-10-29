@@ -1,0 +1,80 @@
+[identification] reference: Walking
+Query: "What was the user doing from 9356 to 9656 seconds?"
+Answer: Walking
+Activity/Event: Walking
+Evidence:
+  Timestamp(s): 9372 to 9483, 9549 to 9656 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Walking accounts for 218 of 312 analysed seconds between 9356 and 9656 s (70%). The cited windows show accelerometer magnitude variability of 0.163 g, a regular rhythm at 2.15 Hz (about 129 cycles/min, periodicity 0.46), gyroscope rotation averaging 0.98 rad/s, gravity within 30 degrees of the device Z-axis: a regular gait rhythm at walking cadence with moderate heel-strike impacts. For contrast, the rest of the recording averages 0.011 g variability.
+
+[verification] reference: Yes
+Query: "Was the user walking between 9356 and 9656 seconds?"
+Answer: Yes
+Activity/Event: Walking
+Evidence:
+  Timestamp(s): 9372 to 9483, 9549 to 9656 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Walking detected in 2 interval(s) between 9356 and 9656 s, 218 s in total. The cited windows show accelerometer magnitude variability of 0.163 g, a regular rhythm at 2.15 Hz (about 129 cycles/min, periodicity 0.46), gyroscope rotation averaging 0.98 rad/s, gravity within 30 degrees of the device Z-axis: a regular gait rhythm at walking cadence with moderate heel-strike impacts. For contrast, the rest of the recording averages 0.011 g variability.
+
+[duration] reference: 1280 seconds
+Query: "What was the total duration of walking?"
+Answer: 1095 seconds
+Activity/Event: Walking
+Evidence:
+  Timestamp(s): 1365 to 1476, 6960 to 7023, 9120 to 9135, 9183 to 9303, 9372 to 9483, 9549 to 10098, 10152 to 10263, 10317 to 10332 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Walking was detected in 8 separate interval(s) of 111, 63, 15, 120, 111, 549, 111, 15 seconds, which sum to 1095 seconds. The cited windows show accelerometer magnitude variability of 0.205 g, a regular rhythm at 2.04 Hz (about 122 cycles/min, periodicity 0.55), gyroscope rotation averaging 0.92 rad/s, gravity within 31 degrees of the device Z-axis: a regular gait rhythm at walking cadence with moderate heel-strike impacts. For contrast, the rest of the recording averages 0.006 g variability.
+
+[count] reference: 1 time
+Query: "How many times did the user start walking?"
+Answer: 8 times
+Activity/Event: Walking
+Evidence:
+  Timestamp(s): 1365 to 1476, 6960 to 7023, 9120 to 9135, 9183 to 9303, 9372 to 9483, 9549 to 10098, 10152 to 10263, 10317 to 10332 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Counted separate bouts of walking lasting at least 10 s, split wherever another activity or a gap over 45 s intervenes. The cited windows show accelerometer magnitude variability of 0.205 g, a regular rhythm at 2.04 Hz (about 122 cycles/min, periodicity 0.55), gyroscope rotation averaging 0.92 rad/s, gravity within 31 degrees of the device Z-axis: a regular gait rhythm at walking cadence with moderate heel-strike impacts. For contrast, the rest of the recording averages 0.006 g variability.
+
+[comparison] reference: Sitting
+Query: "Was there more sitting or cycling?"
+Answer: Sitting
+Activity/Event: Sitting, Bicycling
+Evidence:
+  Timestamp(s): Sitting = 3618 seconds total, Bicycling = 0 seconds total
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Total sitting time (3618 s) exceeded total bicycling time (0 s).
+
+[grounding] reference: Yes, walking began at 9356 seconds
+Query: "When did the user start walking?"
+Answer: Yes, walking began at 1365 seconds
+Activity/Event: Onset of walking
+Evidence:
+  Timestamp(s): 1365 to 1476 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: The preceding interval (1173 to 1308 s) was sitting with 0.009 g variability; at 1365 s this changes to 0.096 g, marking the transition. The cited windows show accelerometer magnitude variability of 0.096 g, a regular rhythm at 1.45 Hz (about 87 cycles/min, periodicity 0.44), gyroscope rotation averaging 0.61 rad/s, gravity within 29 degrees of the device Z-axis: a regular gait rhythm at walking cadence with moderate heel-strike impacts. For contrast, the rest of the recording averages 0.027 g variability.
+
+[prolonged] reference: No
+Query: "Did the user lie down for a prolonged period?"
+Answer: No
+Activity/Event: Prolonged lying down
+Evidence:
+  Timestamp(s): 8412 to 8940 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: The longest continuous lying down bout lasts 528 s (under the 600 s threshold for 'prolonged'). The cited windows show accelerometer magnitude variability of 0.002 g, no dominant rhythm (periodicity 0.18), gyroscope rotation averaging 0.02 rad/s, gravity within 2 degrees of the device Z-axis: very little motion with a device orientation that differs from the upright posture, consistent with lying down rather than sitting or standing. For contrast, the rest of the recording averages 0.028 g variability.
+
+[open_world] reference: Not consistent
+Query: "Is the recording consistent with the user exercising?"
+Answer: Not consistent
+Activity/Event: Exercise or physical exertion (via running, bicycling, walking)
+Evidence:
+  Timestamp(s): 1365 to 1476, 9183 to 9303, 9372 to 9483, 9549 to 10098, 10152 to 10263 (seconds from start)
+  Sensor Modality: Accelerometer, Gyroscope
+  Sensor Channel(s): All
+Explanation: Activities that would support 'exercise or physical exertion' cover 11% of the analysed time, with moderate intensity overall and a longest bout of 549 s. The cited windows show accelerometer magnitude variability of 0.219 g, a regular rhythm at 2.01 Hz (about 121 cycles/min, periodicity 0.57), gyroscope rotation averaging 0.96 rad/s, gravity within 32 degrees of the device Z-axis.
+

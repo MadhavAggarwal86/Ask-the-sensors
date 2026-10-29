@@ -1,0 +1,29 @@
+{
+  "per_type": {
+    "comparison": 0.9,
+    "count": 0.5701754385964912,
+    "duration": 0.43859649122807015,
+    "grounding": 0.24324324324324326,
+    "identification": 0.56,
+    "open_world": 0.7625,
+    "prolonged": 0.85,
+    "verification": 0.76
+  },
+  "overall_macro": 0.6355643966334756,
+  "grounded_per_type": {
+    "comparison": 0.5125,
+    "count": 0.42105263157894735,
+    "duration": 0.3684210526315789,
+    "grounding": 0.24324324324324326,
+    "identification": 0.5466666666666666,
+    "open_world": 0.4625,
+    "prolonged": 0.5375,
+    "verification": 0.7066666666666667
+  },
+  "grounded_macro": 0.47481878259838783,
+  "n": 767,
+  "latency_ms_mean": 0.31538701668895314,
+  "duration_mae_s": 1055.5,
+  "grounding_precision": 0.44773850796156067,
+  "recordings": 40
+}
