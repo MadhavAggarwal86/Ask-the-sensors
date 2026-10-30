@@ -13,7 +13,7 @@ running, bicycling).
 The trained activity model and a demo recording are included, so no dataset download is needed:
 
 ```bash
-git clone <this repository> && cd <repository folder>
+git clone https://github.com/MadhavAggarwal86/Ask-the-sensors.git && cd Ask-the-sensorsAsk-the-sensors
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt && pip install -e .
 CMAKE_ARGS="-DGGML_METAL=on" pip install -r requirements-llm.txt
