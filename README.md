@@ -6,6 +6,19 @@ running, bicycling).
 
 **Time base:** every timestamp is reported in **seconds from the start of the recording**.
 
+## Quick start (web page, about 5 minutes)
+
+The trained activity model and a demo recording are included, so no dataset download is needed:
+
+```bash
+git clone <this repository> && cd <repository folder>
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && pip install -e .
+CMAKE_ARGS="-DGGML_METAL=on" pip install -r requirements-llm.txt
+python -c "from huggingface_hub import hf_hub_download as d; d('unsloth/Qwen3-1.7B-GGUF', 'Qwen3-1.7B-Q4_K_M.gguf', local_dir='models/slm')"
+streamlit run app.py
+```
+
 ## Results at a glance (12 held-out users, real ExtraSensory data)
 
 | | |

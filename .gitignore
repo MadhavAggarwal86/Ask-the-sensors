@@ -9,3 +9,5 @@ __pycache__/
 .DS_Store
 models/**/*.gguf
 models/slm/.cache/
+.claude/
+!data/demo/
