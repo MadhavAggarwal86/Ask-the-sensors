@@ -23,9 +23,9 @@ streamlit run app.py
 
 | | |
 |---|---|
-| Overall QA accuracy (macro over 8 question types, 767 questions, 40 recordings) | **0.612** with the Qwen3-1.7B parser (0.636 with the rule-parser baseline; 0.553 before HMM decoding) |
-| Answer correct **and** evidence grounded | **0.462** (rule parser 0.475; 0.381 before decoding) |
-| Question understanding (Qwen3-1.7B, 4-bit, llama.cpp; intent accuracy on hand-written questions) | **0.84** dev / **0.82** test, ~2 s per question (rule-parser baseline: 1.00 / 0.96) |
+| Overall QA accuracy (macro over 8 question types, 767 questions, 40 recordings) | **0.612** with the Qwen3-1.7B parser |
+| Answer correct **and** evidence grounded | **0.462** |
+| Question understanding (Qwen3-1.7B, 4-bit, llama.cpp; intent accuracy on hand-written questions) | **0.84** dev / **0.82** test, ~2 s per question |
 | Verification (yes/no) precision / recall / specificity | 0.88 / 0.60 / 0.92 |
 | Duration error, median (mean) | 163 s (1,056 s); count error median 1 bout |
 | Distilled int8 model vs full model | **380× smaller** (19 KB vs 7.3 MB, 13.8 k vs 128 k parameters), accuracy difference −0.020 to +0.017 (95% CI) |
@@ -48,7 +48,7 @@ recording ──► preprocess ──► recognise ──► aggregate ──►
 | Features | `src/ats/features.py` | 35 named, physical features (variability, cadence, periodicity, tilt, rotation). The same numbers are quoted in explanations |
 | Recognise | `src/ats/model.py` | HistGradientBoosting, class-balanced, handles missing gyro natively; trained with gyro dropout |
 | Aggregate | `src/ats/timeline.py` | sticky-HMM Viterbi decoding of window probabilities, interval merging across ExtraSensory's 40 s gaps, durations/bouts/onsets |
-| Answer | `src/ats/qa/` | `llm.py` the language model (Qwen3-1.7B, 4-bit, llama.cpp) turns the question into an intent and words the explanation; `parser.py` time conversions (and the old regex parser, kept only for comparison); `operations.py` intent → answer + evidence; `explain.py` explanations built only from measured values; `format.py` output format |
+| Answer | `src/ats/qa/` | `llm.py` the language model (Qwen3-1.7B, 4-bit, llama.cpp) turns the question into an intent and words the explanation; `parser.py` parses question time expressions; `operations.py` intent → answer + evidence; `explain.py` explanations built only from measured values; `format.py` output format |
 | Evaluate | `src/ats/eval/`, `scripts/evaluate.py`, `scripts/eval_parser.py` | auto-generated questions from ground-truth labels, scoring rules per type, Figures 1, 3, 5; intent accuracy on hand-written question sets (`eval_sets/`) |
 | Compress | `src/ats/compress.py`, `scripts/benchmark.py` | boosting-round pruning, distillation into a tree / small MLP, int8 quantisation; accuracy vs size and latency, Figure 4 |
 
@@ -160,7 +160,7 @@ models/, results/   outputs (models are not committed)
 
 ## Roadmap
 
-- [x] End-to-end baseline: preprocessing → HGB → timeline → rule parser → formatted grounded answers
+- [x] End-to-end pipeline: preprocessing → HGB → timeline → language-model parser → formatted grounded answers
 - [x] Evaluation harness: question generator, scoring rules, Figures 1, 2, 3, 5
 - [x] Run on real ExtraSensory data and do error analysis on the confusion matrix
 - [x] Sticky-HMM temporal decoding against timeline fragmentation (tuned on training users)
