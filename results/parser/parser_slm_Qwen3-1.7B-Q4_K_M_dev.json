@@ -9,7 +9,7 @@
     "grounding": 1.0,
     "open_world": 0.8571428571428571
   },
-  "latency_ms_mean": 2588.698596979851,
+  "latency_ms_mean": 2265.862485673808,
   "n": 55,
   "llm_calls": 55,
   "llm_repairs": 0

@@ -18,3 +18,4 @@ figure { margin: 0.6em 0; text-align: center; page-break-inside: avoid; }
 figure img { max-width: 100%; }
 figcaption { font-size: 8.5pt; color: #444; margin-top: 2px; }
 code { font-family: "Menlo", monospace; font-size: 8.8pt; }
+h1#references ~ ul { font-size: 8.5pt; line-height: 1.25; }

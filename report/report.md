@@ -13,14 +13,17 @@ timestamps it relied on, the sensor modality and channels, and an explanation bu
 signal properties. The system is layered. Signals are cleaned, resampled to 25 Hz and cut into
 6 s windows. A class-balanced gradient-boosted classifier labels each window from 35 named
 physical features. A sticky hidden Markov model decodes the window probabilities into an activity
-timeline. Questions are parsed into a structured intent and executed as operations on that
-timeline. The central design rule is that **the language layer never produces a number**: every
-duration, count, timestamp and feature value in an answer is read off the timeline. On 767
-questions over 40 recordings of 12 held-out ExtraSensory users the system answers 63.6% correctly
-(macro-average over eight question types) and 47.5% correctly *with* correct evidence. Temporal
-decoding raised these from 55.3% and 38.1%. A rule-based parser hardened on a development set
-reaches 96% intent accuracy on unseen hand-written questions, well above small language models used
-as parsers (58–62% intent accuracy for Qwen2.5-0.5B). For the efficiency extra credit, a distilled, 8-bit quantised MLP is 380×
+timeline. A small language model, Qwen3-1.7B quantised to 4 bits and run locally with llama.cpp,
+reads each question into a schema-constrained intent; Python executes it as operations on the
+timeline, and the model then words the explanation. The central design rule is that **the language
+layer never produces a number**: every duration, count, timestamp and feature value in an answer is
+computed from the timeline, and a model-worded explanation is discarded if it contains a number the
+pipeline did not compute. On 767 questions over 40 recordings of 12 held-out ExtraSensory users the
+system answers 61.2% correctly (macro-average over eight question types) and 46.2% correctly *with*
+correct evidence, against 63.6% and 47.5% for a hand-tuned rule parser that we built first and keep
+as a baseline. Temporal decoding raised the rule-parser figures from 55.3% and 38.1%. On unseen
+hand-written questions the language model reaches 82% intent accuracy (rules: 96%), at about 2 s per
+question on a laptop. For the efficiency extra credit, a distilled, 8-bit quantised MLP is 380×
 smaller than the full model (19 KB vs 7.3 MB) and 40× faster in classification, with no measurable
 loss of QA accuracy (paired 95% CI of the difference −0.020 to +0.017).
 
@@ -44,7 +47,8 @@ We frame the problem as four sub-problems, matching the four tiers of the brief:
    commuting, chores, falls — argued from activity patterns and signal properties.
 
 Two consequences shaped the design. First, numbers produced by a language model cannot be trusted
-to match the signal, so all quantitative content must come from a deterministic structure. Second,
+to match the signal, so all quantitative content must come from a deterministic structure; a
+language model may read the question and word the explanation, but not compute. Second,
 a question about a whole recording aggregates hundreds of window decisions, so errors that are
 harmless per window (an isolated misclassification) become severe after aggregation (a spurious
 extra bout). Section 3.4 shows this effect is the main lever for tier-2 accuracy.
@@ -111,8 +115,8 @@ sampling is seeded per recording, so every configuration answers exactly the sam
 about unseen phrasing. We wrote 105 questions annotated with the intent they should produce
 (operation, activity groups, time range), covering paraphrases, synonyms, number words, clock and
 day-period times, typos, unsupported quantities and open-world cues. They were split *before* any
-parser work into a development set (55 questions, used to improve the parser) and a test set (50,
-only scored, before and after).
+parser work into a development set (55 questions, used to improve the parsers and the prompt) and
+a test set (50, only scored).
 
 **Correctness rules.** Following the brief, each answer type has its own rule, and overall QA
 accuracy is the fraction correct per type, macro-averaged over types:
@@ -135,7 +139,7 @@ fixed 1–5 rubric (Section 5.7).
 
 # 3. System design
 
-![System architecture. Every quantitative statement in an answer is read off the timeline.](figures/fig0_architecture.png){width=100%}
+![System architecture. Every quantitative statement in an answer is read off the timeline.](figures/fig0_architecture.png){width=90%}
 
 ## 3.1 Preprocessing
 
@@ -196,7 +200,7 @@ from τ = 600 s to 4,800 s form a flat optimum (objective 0.290–0.291); we cho
 interior and physically plausible value. On the validation users the predicted number of bouts per
 true bout fell from 1.80 to 0.98, and count accuracy rose from 0.14 to 0.39.
 
-![Decoder tuning on held-out training users. Dashed: moving-average baseline.](../results/extrasensory/fig_smoothing_tuning.png){width=100%}
+![Decoder tuning on held-out training users. Dashed: moving-average baseline.](../results/extrasensory/fig_smoothing_tuning.png){width=72%}
 
 After decoding, consecutive same-label windows are merged into intervals, gaps up to 45 s are
 bridged (ExtraSensory's normal gap between bursts is ~40 s), intervals shorter than 9 s between two
@@ -210,20 +214,20 @@ compare, longest, prolonged, open), a list of activity groups and an optional ti
 groups let one word stand for several classes ("standing" covers both standing classes, "resting"
 covers lying, sitting and standing in place, "on foot" covers walking and running).
 
-The default parser is rule-based: deterministic, about 0.3 ms per question, and fully reproducible.
-It normalises spoken forms (number words, "half an hour", "final", "minute 3"), corrects misspelt
-activity words (same first letter, ≥ 88% string similarity, with a list of real words such as
-"waking" that are never corrected), resolves relative ranges ("first 10 minutes", "after 20
-minutes", "45 minutes in"), clock times (± 30 min) and day periods (clipped to the recording), and
-selects the operation by ordered patterns. Questions that ask for unmeasurable quantities (heart
-rate, location, mood) are routed to an explicit refusal rather than answered from motion.
+**Language-model parser (the system).** Qwen3-1.7B, quantised to 4 bits (Q4_K_M GGUF, 1.0 GB), runs
+locally through llama.cpp (Metal GPU, thinking mode off, greedy decoding). A fixed prompt with 22
+worked examples, unlike the evaluation phrasings, asks for a JSON object: the operation, the
+activity groups, the time expression *as written* (kind — between, after, before, first, last, at,
+clock, day period — with its numbers, unit, clock time or period) and, for open-world questions, the
+topic (e.g. exercise, sleep, heart rate). llama.cpp compiles the JSON schema into a grammar, so the
+output is always well-formed and names only known operations and classes. Python converts the time
+expression into seconds from the recording start; the model does no arithmetic. A day period or
+clock time absent from the question is dropped, and a comparison with one activity is answered as
+that activity's duration. Qwen3-0.6B (378 MB) can be chosen for speed.
 
-An optional small language model (Qwen2.5-0.5B-Instruct by default, few-shot prompted) produces the
-same intent as JSON. By design it only decides the operation and the activities; time ranges stay
-with the deterministic extractor, because small models are unreliable at converting "around 10:15"
-into seconds from the recording start. Its output is validated against the schema; anything invalid
-falls back to the rules. In *hybrid* mode the rules answer first and the model is consulted only
-when the rule parse looks uncertain. Section 5.5 compares the options.
+**Rule parser (baseline).** A deterministic parser built first (spoken-form normalisation, typo
+correction, time patterns, ordered operation patterns; 0.3 ms per question) is kept as a baseline
+and used where an experiment should isolate the sensor pipeline (Sections 5.3, 5.4 and 6).
 
 ## 3.6 Operations and the grounding rule
 
@@ -250,6 +254,9 @@ accelerometer magnitude variability of 0.193 g, a regular rhythm at 2.14 Hz (abo
 periodicity 0.39), gyroscope rotation averaging 0.97 rad/s … For contrast, the rest of the recording
 averages 0.062 g variability."* A "Yes" whose supporting intervals have a mean probability below 0.6
 is hedged as "Likely yes", and a "No" is still grounded by citing what the user was doing instead.
+The language model then rewords this template in plain sentences from the computed fields only;
+its text is kept only if every number in it appears in those fields (otherwise the template is used:
+14 of 670 explanations), and "N/A" answers are never reworded.
 
 ## 3.7 Open-world reasoning
 
@@ -279,20 +286,24 @@ The code is a Python package (`src/ats/`) with one module per layer, plus script
 | Efficiency, Figure 4 | `scripts/benchmark.py` | `efficiency.json`, figure |
 | Parser evaluation | `scripts/eval_parser.py` | intent accuracy per set |
 | Explanation rubric | `scripts/grade_explanations.py sheet` / `agree` | grading sheets, agreement |
-| Answer questions | `scripts/answer.py --recording r.csv --questions q.txt` | 6-field answers |
+| Answer questions | `scripts/answer.py --recording r.csv --questions q.txt [--slm Qwen3-0.6B]` | 6-field answers |
+| Web page | `streamlit run app.py` | upload, choose model, ask |
 
 All randomness is seeded: the user split is stored in `configs/split.json`, question sampling is
 seeded by a CRC32 hash of the recording id (Python's `hash()` is salted per process), and models use
 fixed random states. A test suite of 25 checks (`pytest`) exercises every layer on synthetic
 signals, which are used only for testing and never reported as results. The runnable system reads
 any CSV with a time column and accelerometer (optionally gyroscope) columns, with loose column-name
-matching; a 4.4-hour recording is loaded and 11 questions answered in about 2 s on a laptop.
+matching; a 4.4-hour recording is processed in under 1 s, after which each question takes 2–5 s,
+almost all of it the language model. A Streamlit page (`app.py`) offers the same pipeline: upload one
+or more recordings, choose Qwen3-1.7B or Qwen3-0.6B, ask a question and read the six-field answer
+with the recognised activity timeline.
 
 # 5. Results
 
 ## 5.1 Recognition backbone
 
-![Figure 2. Window-level confusion matrix on the 12 test users (raw classifier output, before temporal decoding).](../results/extrasensory/fig2_confusion_hgb_full.png){width=62%}
+![Figure 2. Window-level confusion matrix on the 12 test users (raw classifier output, before temporal decoding).](../results/extrasensory/fig2_confusion_hgb_full.png){width=50%}
 
 | Class | Precision | Recall | F1 |
 |---|---:|---:|---:|
@@ -322,58 +333,70 @@ running).
 
 ## 5.2 Question answering
 
-![Figure 1. QA accuracy by question type on 767 questions over 40 held-out recordings, with the correctness rule under each type. Blue: answer correct; orange: answer correct and evidence grounded.](../results/extrasensory/fig1_accuracy_by_type_hgb_full_hmm.png){width=88%}
+![Figure 1. QA accuracy of the full system (Qwen3-1.7B parser) by question type on 767 questions over 40 held-out recordings, with the correctness rule under each type. Blue: answer correct; orange: answer correct and evidence grounded.](../results/extrasensory/fig1_accuracy_by_type_hgb_full_hmm_slm_slm.png){width=68%}
 
-| Question type | Moving average | **HMM** | Grounded, MA | **Grounded, HMM** |
-|---|---:|---:|---:|---:|
-| Identification | 0.51 | **0.56** | 0.44 | **0.55** |
-| Verification | 0.73 | **0.76** | 0.60 | **0.71** |
-| Duration | 0.29 | **0.44** | 0.26 | **0.37** |
-| Count | 0.37 | **0.57** | 0.30 | **0.42** |
-| Comparison | 0.79 | **0.90** | 0.41 | **0.51** |
-| Onset (grounding) | 0.15 | **0.24** | 0.15 | **0.24** |
-| Prolonged | 0.84 | **0.85** | 0.49 | **0.54** |
-| Open-world | 0.75 | **0.76** | 0.40 | **0.46** |
-| **Overall (macro)** | 0.553 | **0.636** | 0.381 | **0.475** |
+| Question type | Rules, MA | Rules, HMM | **SLM, HMM** | Grounded, rules, HMM | **Grounded, SLM, HMM** |
+|---|---:|---:|---:|---:|---:|
+| Identification | 0.51 | 0.56 | **0.53** | 0.55 | **0.49** |
+| Verification | 0.73 | 0.76 | **0.69** | 0.71 | **0.65** |
+| Duration | 0.29 | 0.44 | **0.42** | 0.37 | **0.36** |
+| Count | 0.37 | 0.57 | **0.57** | 0.42 | **0.42** |
+| Comparison | 0.79 | 0.90 | **0.82** | 0.51 | **0.53** |
+| Onset (grounding) | 0.15 | 0.24 | **0.24** | 0.24 | **0.24** |
+| Prolonged | 0.84 | 0.85 | **0.85** | 0.54 | **0.54** |
+| Open-world | 0.75 | 0.76 | **0.76** | 0.46 | **0.46** |
+| **Overall (macro)** | 0.553 | 0.636 | **0.612** | 0.475 | **0.462** |
 
-: QA accuracy before and after temporal decoding (same model, same questions).
+: QA accuracy by parser and decoder (same classifier, same questions). MA: moving-average smoothing. SLM: the Qwen3-1.7B system.
 
-The headline is **63.6% overall QA accuracy and 47.5% with grounded evidence**. Accuracy is high
-where the answer depends on the overall picture (comparison 0.90, prolonged 0.85, verification
-0.76, open-world 0.76) and lower where exact boundaries matter (onset 0.24, duration 0.44). The gap
+The headline is **61.2% overall QA accuracy and 46.2% with grounded evidence** for the full system.
+With the rule parser the same sensor pipeline reaches 63.6% and 47.5%; the difference of 2.4 points
+is the cost of reading questions with a language model instead of hand-tuned patterns, and is
+concentrated in verification and comparison, where the model sometimes reads "Was the user X
+between a and b?" as an identification (21 of 150 verification questions) and merges the two
+activities of a comparison. A first run with a
+shorter prompt scored 50.5%: the model read "is this consistent with commuting?" as yes/no
+(open-world 0.11). We added general instructions and three differently worded examples for such
+phrasings and re-ran once; we report that run, and note that the change was motivated by the
+evaluation. Accuracy is high where the answer depends on the overall picture (comparison 0.82,
+prolonged 0.85, open-world 0.76) and lower where exact boundaries matter (onset 0.24, duration 0.42). The gap
 between the two bars is the "price of evidence": it is small for verification and onset, whose
 answers already are intervals, and large for comparison and open-world questions, where the
-verdict can be right while the cited intervals overlap the reference only partly. Temporal decoding
-improved every type and cut the mean duration error from 1,600 s to 1,056 s; it did not change the
-classifier at all.
+verdict can be right while the cited intervals overlap the reference only partly. With the rule
+parser, temporal decoding improved every type and cut the mean duration error from 1,600 s to
+1,056 s; it did not change the classifier at all.
 
-| Answer kind | Metric | Value |
-|---|---|---|
-| Verification (yes/no, n = 150) | precision / recall / F1 on "yes"; specificity | 0.88 / 0.60 / 0.71; 0.92 |
-| Prolonged (yes/no, n = 80) | precision / recall / F1 on "yes"; specificity | 0.70 / 0.92 / 0.79; 0.82 |
-| Onset detected (n = 74, all present) | recall ("yes" when the activity starts) | 0.82 |
-| Identification (4 classes, n = 75) | macro-F1 / balanced accuracy | 0.48 / 0.47 |
-| Comparison (6 winners, n = 80) | macro-F1 / balanced accuracy | 0.85 / 0.83 |
-| Open-world (3 verdicts, n = 80) | macro-F1 / balanced accuracy | 0.67 / 0.69 |
-| Duration (n = 114) | mean / median absolute error; MAPE (74 non-zero refs) | 1,056 s / 163 s; 95% |
-| Count (n = 114) | mean / median absolute error | 4.9 / 1.0 bouts |
-| Cited evidence (duration, onset) | grounding precision | 0.45 |
+| Answer kind | Metric | Rules | **SLM system** |
+|---|---|---|---|
+| Verification (yes/no, n = 150) | P / R / F1 on "yes"; specificity | 0.88 / 0.60 / 0.71; 0.92 | **0.85 / 0.73 / 0.79; 0.87** |
+| Prolonged (yes/no, n = 80) | P / R / F1 on "yes"; specificity | 0.70 / 0.92 / 0.79; 0.82 | **0.70 / 0.92 / 0.79; 0.82** |
+| Onset detected (n = 74) | recall | 0.82 | **0.95** |
+| Identification (4 classes, n = 75) | macro-F1 / balanced accuracy | 0.48 / 0.47 | **0.46 / 0.44** |
+| Comparison (6 winners, n = 80) | macro-F1 / balanced accuracy | 0.85 / 0.83 | **0.70 / 0.74** |
+| Open-world (3 verdicts, n = 80) | macro-F1 / balanced accuracy | 0.67 / 0.69 | **0.67 / 0.69** |
+| Duration (n = 114) | mean / median abs. error; MAPE | 1,056 s / 163 s; 95% | **1,107 s / 273 s; 255%** |
+| Count (n = 114) | mean / median abs. error | 4.9 / 1.0 bouts | **4.9 / 1.0 bouts** |
+| Cited evidence (duration, onset) | grounding precision | 0.45 | **0.40** |
 
-: Answer-level metrics beside plain accuracy (same 767 questions).
+: Answer-level metrics (same 767 questions). P/R: precision/recall. MAPE over the 74 non-zero references. A question routed to another operation counts as a wrong label.
 
-These metrics expose two biases that accuracy hides. Verification leans towards "no" (specificity
-0.92, recall 0.60): when the asked-about activity is present, the system misses it in 40% of cases,
-mostly under-recognised postures. Prolonged questions lean the other way (recall 0.92, precision
-0.70): a long still stretch is sometimes over-merged into one bout. The numeric errors are
-heavy-tailed: the typical duration error is 163 s and the typical count error one bout, but a few long
-recordings in which a whole posture is mislabelled (sitting as lying) push the mean to 1,056 s.
-MAPE is inflated by references of a few minutes, where any error is a large percentage.
+These metrics expose biases that accuracy hides. With the rule parser, verification leans towards
+"no" (specificity 0.92, recall 0.60): when the asked-about activity is present, it is missed in 40%
+of cases, mostly under-recognised postures. Prolonged questions lean the other way (recall 0.92,
+precision 0.70): a long still stretch is sometimes over-merged into one bout. These two follow the
+sensor pipeline and are almost unchanged with the language model. The numeric errors are
+heavy-tailed: with the rule parser the typical duration error is 163 s and the typical count error
+one bout, but a few long recordings in which a whole posture is mislabelled (sitting as lying) push
+the mean to 1,056 s. With the language model the median duration error rises to 273 s and MAPE to
+255%, because a misread time range makes the system measure the wrong stretch of the recording;
+MAPE is in any case inflated by references of a few minutes.
 
 ## 5.3 Accuracy versus strictness
 
-![Figure 3. Left: share of duration answers accepted as the relative-error tolerance grows. Right: share of cited intervals accepted as the IoU threshold grows.](../results/extrasensory/fig3_strictness_hgb_full_hmm.png){width=80%}
+![Figure 3. Left: share of duration answers accepted as the relative-error tolerance grows. Right: share of cited intervals accepted as the IoU threshold grows.](../results/extrasensory/fig3_strictness_hgb_full_hmm.png){width=58%}
 
-Figure 3 shows whether misses are near or wild. Duration acceptance grows steadily with the
+Sections 5.3 and 5.4 use the rule parser, so that they measure the sensor pipeline alone. Figure 3
+shows whether misses are near or wild. Duration acceptance grows steadily with the
 tolerance, so many misses are moderate rather than catastrophic. For onsets, the yes/no part is
 right in 82% of cases; when both system and reference say yes, the predicted onset is within 60 s
 of the true one in 34% of cases, within 5 minutes in 51% (median error 258 s). The fixed IoU ≥ 0.5
@@ -382,7 +405,7 @@ starts at the very beginning of a recording that the reference begins later.
 
 ## 5.4 Robustness
 
-![Figure 5. Overall QA accuracy on a fixed set of 10 recordings as the input is degraded.](../results/extrasensory/fig5_robustness_hgb_full_hmm.png){width=85%}
+![Figure 5. Overall QA accuracy on a fixed set of 10 recordings as the input is degraded.](../results/extrasensory/fig5_robustness_hgb_full_hmm.png){width=62%}
 
 | Degradation | Levels → overall QA accuracy |
 |---|---|
@@ -398,29 +421,32 @@ missing data a non-issue, and the features that matter (variability, tilt, caden
 survive at 5 Hz. Additive noise is the weak point: up to 0.05 g accuracy holds (the HMM decoder
 raised accuracy at 0.05 g from 0.26 to 0.61), but at 0.1 g and above accuracy collapses, because
 still postures are separated by variability differences of a few milli-g, which the noise swamps.
-Typical phone accelerometer noise is a few milli-g, so the collapse lies outside realistic
-operating conditions, but it identifies noise-augmented training as the next robustness step.
+Typical phone noise is a few milli-g, so the collapse lies outside realistic conditions.
 
 ## 5.5 Parser generalisation
 
 | Parser | Dev intent acc. | Test intent acc. | Latency / question |
 |---|---:|---:|---:|
 | Rules, before hardening | 0.74 | 0.66 | 0.1 ms |
-| **Rules, after hardening** | **1.00** | **0.96** | **0.3 ms** |
-| Qwen2.5-0.5B-Instruct (LLM only) | 0.62 | 0.58 | 1.6–1.9 s |
-| Hybrid (rules first, 0.5B fallback) | 1.00 | 0.96 | 0.3 ms |
+| Rules, after hardening (baseline) | 1.00 | 0.96 | 0.3 ms |
+| Qwen2.5-0.5B-Instruct, fp32, transformers, operation and activities only | 0.62 | 0.58 | 1.6–1.9 s |
+| Qwen3-0.6B, 4-bit, llama.cpp, operation and activities only | 0.64 | 0.54 | 0.4 s |
+| Qwen3-1.7B, 4-bit, llama.cpp, operation and activities only | 0.73 | 0.76 | 0.6 s |
+| **Qwen3-1.7B, 4-bit, llama.cpp, full intent (the system)** | **0.84** | **0.82** | **2.2 s** |
 
-: Intent accuracy (operation, activities and time range all correct) on the hand-written sets. CPU, single process. Qwen2.5-1.5B (≈6 GB in fp32) was also tried but did not fit in the 8 GB of the target laptop: it swapped and had not finished after 2.5 h, so it is not reported.
+: Intent accuracy (operation, activities and time range all correct) on the hand-written sets. Apple M2 laptop. In the "operation and activities only" rows the time range came from the rule extractor; in the last row the model extracts everything. Qwen2.5-1.5B in fp32 (≈6 GB) did not fit in 8 GB of memory.
 
-Hardening the rules on the development set raised test accuracy from 0.66 to 0.96 (operation and
-activity detection are perfect on the test set; the two misses are time ranges on open-world
-questions). The test set was written before the hardening and scored only twice, but by the same
-authors, so it is not a substitute for truly unseen questions. Small language models were clearly
-worse: mainly they confused operations (a two-activity comparison parsed as "prolonged", a
-verification as "duration") and sometimes produced output that failed validation (8 of 55 dev and
-11 of 50 test questions fell back to the rules), while being nearly four orders of magnitude slower. We therefore ship the rule parser as the
-default and offer the hybrid mode, which on these sets never needed the model but keeps it as a
-safety net for phrasings no rule anticipates.
+Hardening the rules raised test accuracy from 0.66 to 0.96. Among language models, size mattered
+most: the 0.6B models confuse operations, while Qwen3-1.7B gets 87–92% of them right. Four-bit
+quantisation and llama.cpp made it about three times faster than the fp32 Qwen2.5-0.5B, and
+constrained decoding removed invalid outputs (without the schema, 40 of 55 outputs of the 0.6B
+model were rejected). Extracting the time expression too, and adding instructions for behaviour
+questions, raised the 1.7B model from 0.76 to 0.82. Its time ranges are right for 96–98% of
+questions, because it only copies numbers and units; its remaining errors are operations ("Was
+there any walking in the last 10 min?" read as a count) and activity groups ("standing still"
+widened to both standing classes). The test set was scored several times while the prompt changed,
+so 0.82 is somewhat optimistic. The rules are more accurate on these sets but cover only the
+phrasings their authors anticipated, which is why the model is the system's parser.
 
 ## 5.6 Error analysis
 
@@ -434,6 +460,8 @@ Typical remaining errors, from the evaluation records:
   answered 25,377 s against 30,604 s: the timeline is coherent, but part of the sitting was labelled
   as lying. Count errors are now mostly within a few bouts (6 vs 3, 4 vs 2) rather than the 37 vs 3
   seen before decoding.
+- **The language model misroutes some questions.** "Was the user walking between 9,356 and 9,656
+  seconds?" was read as "what was the user doing then?", giving an activity instead of yes/no.
 - **Onsets are found near, not at, the reference.** "When did the user start walking?" answered
   9,414 s against 9,356 s fails the IoU rule although the onset is 58 s off. Others fail because the
   activity is detected in the first minutes of the recording, where the self-reported label starts
@@ -482,7 +510,7 @@ boosting rounds); **distillation** of the full model's class probabilities into 
 training data, uint8 after ReLU, exact int32 accumulation); and an **accelerometer-only** model
 retrained without gyroscope features, so the gyroscope can stay switched off.
 
-![Figure 4. Accuracy versus model size, classifier time and end-to-end latency. Red: Pareto frontier. Error bars: paired 95% bootstrap interval of the difference to the full model, drawn around each point.](../results/extrasensory/fig4_accuracy_vs_overhead.png){width=100%}
+![Figure 4. Accuracy versus model size, classifier time and end-to-end latency. Red: Pareto frontier. Error bars: paired 95% bootstrap interval of the difference to the full model, drawn around each point.](../results/extrasensory/fig4_accuracy_vs_overhead.png){width=74%}
 
 | Configuration | Params | Size | Classifier, 1 h | Query, 1 h | Energy (est.) | QA acc. | Δ vs full (95% CI) |
 |---|---:|---:|---:|---:|---:|---:|---|
@@ -510,7 +538,10 @@ switched off, saving sensor power on a real device.
 Two caveats. First, after compression the end-to-end latency flattens at ~43 ms, which is windowing
 and feature extraction; cheaper features would be the next lever. Second, the int8 classifier is
 slower than the float one here (1.2 vs 0.5 ms) because NumPy has no 8-bit arithmetic kernels; its
-gain on this machine is size, and a speed gain requires int8-capable hardware.
+gain on this machine is size, and a speed gain requires int8-capable hardware. Third, these costs
+use the rule parser. The language model adds about 4 s per question (parse and explanation) and a
+1.0 GB file (Qwen3-0.6B: about 1 s, 378 MB); on an edge device the rule parser and template
+explanations remain the low-cost configuration.
 
 # 7. Limitations and future work
 
@@ -524,11 +555,11 @@ gain on this machine is size, and a speed gain requires int8-capable hardware.
   explanations, and our analysis suggests label noise rather than model capacity is the bottleneck.
 - **Onset precision.** Onsets are often found minutes from the reference. A dedicated change-point
   refinement around the decoded transition could tighten them.
-- **Explanation grading.** The rubric scores need human graders; a 1.5B model judge on this
-  hardware was too slow and did not discriminate right from wrong answers (Section 5.7).
-- **Question coverage.** The generated questions use templates, and the hand-written sets were
-  written by the authors. The hidden questions will contain phrasings neither set anticipates; the
-  hybrid parser is the mitigation.
+- **Question understanding.** The language model reads 82% of unseen hand-written questions
+  correctly against 96% for the rules, and its misreadings cost 2.4 points of QA accuracy; it also
+  adds about 4 s per question and a 1.0 GB model (Section 6). A larger
+  model, or a parser fine-tuned on paraphrased questions, would close this gap. The generated
+  questions use templates and the hand-written sets were written by the authors.
 
 # 8. Contribution statement
 
@@ -567,4 +598,5 @@ Section 4. [List any other AI tools used, and what for.]
   (the histogram-based boosting that scikit-learn's HistGradientBoosting follows).
 - L. Rabiner. A tutorial on hidden Markov models and selected applications in speech recognition.
   *Proceedings of the IEEE* 77(2), 1989.
-- Qwen Team. Qwen2.5 technical report. arXiv:2412.15115, 2024.
+- Qwen Team. Qwen2.5 technical report, arXiv:2412.15115, 2024; Qwen3 technical report, arXiv:2505.09388, 2025.
+- G. Gerganov et al. llama.cpp, https://github.com/ggml-org/llama.cpp (GGUF quantisation of Qwen3 by Unsloth).

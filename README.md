@@ -10,9 +10,9 @@ running, bicycling).
 
 | | |
 |---|---|
-| Overall QA accuracy (macro over 8 question types, 767 questions, 40 recordings) | **0.636** (0.553 before HMM decoding) |
-| Answer correct **and** evidence grounded | **0.475** (0.381 before) |
-| Question understanding (Qwen3-1.7B, 4-bit, llama.cpp; intent accuracy on hand-written questions) | **0.78** dev / **0.78** test, ~2 s per question (the old regex parser: 1.00 / 0.96) |
+| Overall QA accuracy (macro over 8 question types, 767 questions, 40 recordings) | **0.612** with the Qwen3-1.7B parser (0.636 with the rule-parser baseline; 0.553 before HMM decoding) |
+| Answer correct **and** evidence grounded | **0.462** (rule parser 0.475; 0.381 before decoding) |
+| Question understanding (Qwen3-1.7B, 4-bit, llama.cpp; intent accuracy on hand-written questions) | **0.84** dev / **0.82** test, ~2 s per question (rule-parser baseline: 1.00 / 0.96) |
 | Verification (yes/no) precision / recall / specificity | 0.88 / 0.60 / 0.92 |
 | Duration error, median (mean) | 163 s (1,056 s); count error median 1 bout |
 | Distilled int8 model vs full model | **380× smaller** (19 KB vs 7.3 MB, 13.8 k vs 128 k parameters), accuracy difference −0.020 to +0.017 (95% CI) |
