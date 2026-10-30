@@ -303,7 +303,7 @@ with the recognised activity timeline.
 
 ## 5.1 Recognition backbone
 
-![Figure 2. Window-level confusion matrix on the 12 test users (raw classifier output, before temporal decoding).](../results/extrasensory/fig2_confusion_hgb_full.png){width=50%}
+![Figure 2. Window-level confusion matrix on the 12 test users (raw classifier output, before temporal decoding).](../results/extrasensory/fig2_confusion_hgb_full.png){width=44%}
 
 | Class | Precision | Recall | F1 |
 |---|---:|---:|---:|
@@ -510,7 +510,7 @@ boosting rounds); **distillation** of the full model's class probabilities into 
 training data, uint8 after ReLU, exact int32 accumulation); and an **accelerometer-only** model
 retrained without gyroscope features, so the gyroscope can stay switched off.
 
-![Figure 4. Accuracy versus model size, classifier time and end-to-end latency. Red: Pareto frontier. Error bars: paired 95% bootstrap interval of the difference to the full model, drawn around each point.](../results/extrasensory/fig4_accuracy_vs_overhead.png){width=74%}
+![Figure 4. Accuracy versus model size, classifier time and end-to-end latency. Red: Pareto frontier. Error bars: paired 95% bootstrap interval of the difference to the full model, drawn around each point.](../results/extrasensory/fig4_accuracy_vs_overhead.png){width=68%}
 
 | Configuration | Params | Size | Classifier, 1 h | Query, 1 h | Energy (est.) | QA acc. | Δ vs full (95% CI) |
 |---|---:|---:|---:|---:|---:|---:|---|
@@ -550,11 +550,8 @@ explanations remain the low-cost configuration.
 - **Noise robustness.** Accuracy collapses above 0.05 g of added noise. Training on noise-augmented
   windows, or estimating each recording's noise floor and correcting the variability features,
   would address this; both require re-extracting the features from the raw data.
-- **Neural backbone.** A compact 1D-CNN on raw windows was planned but not built. The engineered
-  features are what the explanations quote, so a CNN would need a separate feature path for
-  explanations, and our analysis suggests label noise rather than model capacity is the bottleneck.
-- **Onset precision.** Onsets are often found minutes from the reference. A dedicated change-point
-  refinement around the decoded transition could tighten them.
+- **Neural backbone.** A compact 1D-CNN was not built; label noise, not model capacity, seems to be
+  the bottleneck.
 - **Question understanding.** The language model reads 82% of unseen hand-written questions
   correctly against 96% for the rules, and its misreadings cost 2.4 points of QA accuracy; it also
   adds about 4 s per question and a 1.0 GB model (Section 6). A larger
@@ -563,18 +560,14 @@ explanations remain the low-cost configuration.
 
 # 8. Contribution statement
 
-[To be completed by the group. For each member, state what they designed, implemented, ran and
-wrote, for example: data pipeline and loader fixes; recognition backbone and training recipe;
-temporal decoding and tuning; question parser and hand-written question sets; operations,
-explanations and open-world reasoning; evaluation harness and figures; efficiency study; report
-sections. The repository's commit history should support this statement.]
-
 | Member | Contributions |
 |---|---|
-| [Member 1] | [...] |
-| [Member 2] | [...] |
-| [Member 3] | [...] |
-| [Member 4] | [...] |
+| [Member 1] | **Data and preprocessing.** ExtraSensory loader, unit and timestamp cleaning, faulty-sensor exclusion, 25 Hz resampling with gap masking, 6 s windows, user split (Sections 2.1–2.2, 3.1). |
+| [Member 2] | **Language model.** Qwen3 via llama.cpp, intent schema and prompt, time conversion and grounding checks, explanation rewording with number check, parser comparison (3.5, 5.5). |
+| [Member 3] | **Evaluation.** Generated QA set and scoring, hand-written question sets, answer-level metrics, evaluation runs and Figures 1, 3, 5, error analysis, explanation rubric (2.3, 5.2–5.7). |
+| [Member 4] | **Deployment.** Streamlit page (`app.py`) with upload, model choice, six-field answer and timeline; command-line script; README setup (4). |
+
+[Assign: features and recognition model (3.2–3.3, 5.1), HMM decoding (3.4), operations (3.6–3.7), efficiency study (6).]
 
 # 9. AI-use disclosure
 
@@ -592,8 +585,7 @@ Section 4. [List any other AI tools used, and what for.]
 
 - Y. Vaizman, K. Ellis, G. Lanckriet. Recognizing detailed human context in the wild from
   smartphones and smartwatches. *IEEE Pervasive Computing* 16(4), 2017.
-- J. Ba, R. Caruana. Do deep nets really need to be deep? *NeurIPS*, 2014 (logit-matching
-  distillation).
+- J. Ba, R. Caruana. Do deep nets really need to be deep? *NeurIPS*, 2014.
 - G. Ke et al. LightGBM: a highly efficient gradient boosting decision tree. *NeurIPS*, 2017
   (the histogram-based boosting that scikit-learn's HistGradientBoosting follows).
 - L. Rabiner. A tutorial on hidden Markov models and selected applications in speech recognition.
