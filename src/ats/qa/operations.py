@@ -242,8 +242,16 @@ UNMEASURABLE = {"heart": "heart rate", "pulse": "heart rate", "blood": "blood pr
                 "emotion": "emotional state", "speak": "speech", "talk": "speech", "audio": "sound"}
 
 
+# Open-world topics the SLM can name -> the keyword that selects the same entry below
+TOPIC_KEYS = {"exercise": "exercis", "commuting": "commut", "sleeping": "sleep", "desk_work": "desk",
+              "chores": "chore", "shopping": "shopping", "hiking": "hike", "fall": "fall",
+              "heart_rate": "heart", "blood": "blood", "temperature": "temperature", "calories": "calorie",
+              "location": "location", "weather": "weather", "mood": "mood", "stress": "stress",
+              "speech": "speak", "other": ""}
+
+
 def open_world(intent: Intent, tl: Timeline) -> Answer:
-    q = intent.question.lower()
+    q = TOPIC_KEYS.get(intent.topic, "") if intent.topic else intent.question.lower()
     missing = next((v for k, v in UNMEASURABLE.items() if k in q), None)
     if missing:
         return Answer("Cannot be determined from these sensors", "N/A", value=None,

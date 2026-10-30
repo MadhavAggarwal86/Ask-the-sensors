@@ -1,0 +1,16 @@
+{
+  "intent": 0.76,
+  "op": 0.86,
+  "activities": 0.92,
+  "t_range": 0.96,
+  "per_tier": {
+    "identification": 0.5833333333333334,
+    "temporal": 0.7916666666666666,
+    "grounding": 1.0,
+    "open_world": 0.7777777777777778
+  },
+  "latency_ms_mean": 547.3937282821862,
+  "n": 50,
+  "llm_calls": 50,
+  "llm_fallbacks": 1
+}

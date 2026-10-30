@@ -9,7 +9,8 @@ requires-python = ">=3.10"
 dependencies = ["numpy", "pandas", "scipy", "scikit-learn", "matplotlib", "joblib"]
 
 [project.optional-dependencies]
-llm = ["transformers", "torch", "accelerate"]
+llm = ["llama-cpp-python", "streamlit", "huggingface_hub"]
+hf = ["transformers", "torch", "accelerate"]
 dev = ["pytest"]
 
 [tool.setuptools.packages.find]

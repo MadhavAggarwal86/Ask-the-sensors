@@ -50,10 +50,17 @@ def _norm(v):
     return v
 
 
+def _num(v):
+    """A numeric answer value, or None (a question routed to the wrong operation returns e.g. a label)."""
+    return v if isinstance(v, (int, float, np.integer, np.floating)) and not isinstance(v, (bool, np.bool_)) else None
+
+
 def answer_correct(qtype: str, pred, ref, dur_rel_tol=DUR_REL_TOL, iou_thr=IOU_THRESHOLD) -> bool:
     pv, rv = pred.value, ref.value
     if qtype in EXACT_TYPES:
         return _norm(pv) == _norm(rv)
+    if qtype in ("duration", "count") and pv is not None and _num(pv) is None:
+        return False
     if qtype == "duration":
         if pv is None or rv is None:
             return pv == rv
@@ -129,8 +136,8 @@ def answer_metrics(records: list[dict]) -> dict:
         if pairs:
             out[t] = _categorical(pairs)
     for t in ("duration", "count"):
-        pairs = [(r["pred"].value, r["ref"].value) for r in records
-                 if r["qtype"] == t and r["pred"].value is not None and r["ref"].value is not None]
+        pairs = [(_num(r["pred"].value), r["ref"].value) for r in records
+                 if r["qtype"] == t and _num(r["pred"].value) is not None and r["ref"].value is not None]
         if not pairs:
             continue
         err = np.array([abs(p - r) for p, r in pairs], float)

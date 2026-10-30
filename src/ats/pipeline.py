@@ -11,8 +11,9 @@ from .timeline import Timeline
 
 
 class SensorQA:
-    def __init__(self, model: ActivityModel, parser=None, smoothing: str = C.SMOOTHING):
+    def __init__(self, model: ActivityModel, parser=None, explainer=None, smoothing: str = C.SMOOTHING):
         self.model = model
+        self.explainer = explainer      # qa.llm.LLMExplainer words the explanation from computed values
         self.parser = parser or parse   # swap in qa.llm.LLMParser(...) for the SLM front end
         self.smoothing = smoothing
         self.timeline: Timeline | None = None
@@ -43,4 +44,7 @@ class SensorQA:
         if self.timeline is None:
             raise RuntimeError("call load(recording) first")
         intent = self.parser(question, duration=self.duration, t0=self.t0)
-        return operations.run(intent, self.timeline)
+        ans = operations.run(intent, self.timeline)
+        if self.explainer is not None:
+            ans.explanation = self.explainer(question, ans)
+        return ans

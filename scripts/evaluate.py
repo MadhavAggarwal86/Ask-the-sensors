@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ats import config as C
+from ats.qa.llm import DEFAULT_SLM
 from ats.dataset import held_out_recordings
 from ats.eval import metrics as M
 from ats.eval.run import ask_generated
@@ -91,11 +92,23 @@ def main():
     ap.add_argument("--max-recordings", type=int, default=40)
     ap.add_argument("--smoothing", choices=["hmm", "moving_average"], default=C.SMOOTHING)
     ap.add_argument("--robustness", action="store_true")
+    ap.add_argument("--parser", choices=["slm", "rule"], default="slm",
+                    help="slm: the language model extracts every intent (the system); rule: the old regex parser")
+    ap.add_argument("--explainer", choices=["slm", "template"], default="slm")
+    ap.add_argument("--llm-model", default=str(DEFAULT_SLM),
+                    help="a .gguf file (llama.cpp) or a Hugging Face model id (transformers)")
     args = ap.parse_args()
     out = C.RESULTS_DIR / args.source
     out.mkdir(parents=True, exist_ok=True)
-    qa = SensorQA.from_path(C.MODELS_DIR / f"{args.model}.joblib", smoothing=args.smoothing)
-    tag = f"{args.model}_{args.smoothing}"
+    parser = explainer = slm = None
+    if args.parser != "rule" or args.explainer == "slm":
+        from ats.qa.llm import SLM, LLMExplainer, LLMParser
+        slm = SLM(args.llm_model)
+        parser = LLMParser(slm) if args.parser == "slm" else None
+        explainer = LLMExplainer(slm) if args.explainer == "slm" else None
+    qa = SensorQA.from_path(C.MODELS_DIR / f"{args.model}.joblib", smoothing=args.smoothing,
+                            parser=parser, explainer=explainer)
+    tag = f"{args.model}_{args.smoothing}" + ("" if slm is None else f"_{args.parser}_{args.explainer}")
 
     items = held_out_recordings(args.source, args.max_recordings)
     records = evaluate(qa, items)
@@ -108,6 +121,10 @@ def main():
     sc["grounding_precision"] = float(np.nanmean(gp)) if gp else None
     sc["answer_metrics"] = M.answer_metrics(records)
     sc["recordings"] = len(items)
+    if parser is not None:
+        sc["slm_parser"] = {"calls": parser.calls, "repairs": parser.repairs}
+    if explainer is not None:
+        sc["slm_explainer"] = {"calls": explainer.calls, "fallbacks_to_template": explainer.fallbacks}
     print(json.dumps(sc, indent=2))
     (out / f"qa_metrics_{tag}.json").write_text(json.dumps(sc, indent=2))
     with open(out / f"qa_records_{tag}.jsonl", "w") as f:

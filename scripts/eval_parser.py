@@ -11,8 +11,10 @@ import argparse
 import datetime as dt
 import json
 import time
+from pathlib import Path
 
 from ats import config as C
+from ats.qa.llm import DEFAULT_SLM
 from ats.qa.parser import parse
 
 DURATION = 7200.0
@@ -31,11 +33,11 @@ def match(it, ref) -> dict:
     return ok
 
 
-def load_parser(name: str, mode: str = "hybrid", model_id: str = "Qwen/Qwen2.5-0.5B-Instruct"):
+def load_parser(name: str, model_id: str = str(DEFAULT_SLM)):
     if name == "rule":
         return parse
     from ats.qa.llm import LLMParser
-    return LLMParser(model_id, mode)
+    return LLMParser(model_id)
 
 
 def evaluate(parser, split: str, show_failures: bool = False) -> dict:
@@ -62,20 +64,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--parser", choices=["rule", "llm"], default="rule")
     ap.add_argument("--split", choices=["dev", "test", "both"], default="dev")
-    ap.add_argument("--llm-mode", choices=["llm", "hybrid"], default="hybrid")
-    ap.add_argument("--llm-model", default="Qwen/Qwen2.5-0.5B-Instruct")
+    ap.add_argument("--llm-model", default=str(DEFAULT_SLM),
+                    help="a .gguf file (llama.cpp) or a Hugging Face model id (transformers)")
     ap.add_argument("--show-failures", action="store_true", help="list failed questions (use on dev only)")
     ap.add_argument("--tag", default="", help="suffix for the results file, e.g. 'before'")
     args = ap.parse_args()
-    parser = load_parser(args.parser, args.llm_mode, args.llm_model)
-    name = args.parser if args.parser == "rule" else f"{args.llm_mode}_{args.llm_model.split('/')[-1]}"
+    parser = load_parser(args.parser, args.llm_model)
+    name = args.parser if args.parser == "rule" else f"slm_{Path(args.llm_model).name.removesuffix('.gguf')}"
     out = C.RESULTS_DIR / "parser"
     out.mkdir(parents=True, exist_ok=True)
     for split in (["dev", "test"] if args.split == "both" else [args.split]):
         res = evaluate(parser, split, args.show_failures)
         if args.parser == "llm":
-            res["llm_calls"], res["llm_fallbacks"] = parser.calls, parser.fallbacks
-            parser.calls = parser.fallbacks = 0
+            res["llm_calls"], res["llm_repairs"] = parser.calls, parser.repairs
+            parser.calls = parser.repairs = 0
         print(split, json.dumps(res, indent=2))
         (out / f"parser_{name}_{split}{'_' + args.tag if args.tag else ''}.json").write_text(json.dumps(res, indent=2))
 

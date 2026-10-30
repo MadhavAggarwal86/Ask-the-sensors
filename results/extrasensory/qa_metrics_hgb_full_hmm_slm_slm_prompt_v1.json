@@ -1,0 +1,99 @@
+{
+  "per_type": {
+    "comparison": 0.825,
+    "count": 0.38596491228070173,
+    "duration": 0.43859649122807015,
+    "grounding": 0.22972972972972974,
+    "identification": 0.56,
+    "open_world": 0.1125,
+    "prolonged": 0.85,
+    "verification": 0.64
+  },
+  "overall_macro": 0.5052238916548127,
+  "grounded_per_type": {
+    "comparison": 0.525,
+    "count": 0.2719298245614035,
+    "duration": 0.3684210526315789,
+    "grounding": 0.22972972972972974,
+    "identification": 0.5466666666666666,
+    "open_world": 0.0625,
+    "prolonged": 0.5375,
+    "verification": 0.5933333333333334
+  },
+  "grounded_macro": 0.39188507586533905,
+  "n": 767,
+  "latency_ms_mean": 4419.326656341871,
+  "duration_mae_s": 1056.342105263158,
+  "grounding_precision": 0.44516352485675337,
+  "answer_metrics": {
+    "verification": {
+      "n": 150,
+      "positives": 75,
+      "precision": 0.7671232876712328,
+      "recall": 0.7466666666666667,
+      "f1": 0.7567567567567568,
+      "specificity": 0.7733333333333333,
+      "accuracy": 0.76
+    },
+    "prolonged": {
+      "n": 80,
+      "positives": 25,
+      "precision": 0.696969696969697,
+      "recall": 0.92,
+      "f1": 0.793103448275862,
+      "specificity": 0.8181818181818182,
+      "accuracy": 0.85
+    },
+    "grounding_detection": {
+      "n": 74,
+      "positives": 74,
+      "precision": 1.0,
+      "recall": 0.8243243243243243,
+      "f1": 0.9037037037037037,
+      "specificity": null,
+      "accuracy": 0.8243243243243243
+    },
+    "identification": {
+      "n": 75,
+      "classes": 4,
+      "accuracy": 0.56,
+      "macro_f1": 0.482628706419029,
+      "balanced_accuracy": 0.46500333548030914
+    },
+    "comparison": {
+      "n": 80,
+      "classes": 6,
+      "accuracy": 0.825,
+      "macro_f1": 0.6977819813805125,
+      "balanced_accuracy": 0.7368192391899289
+    },
+    "open_world": {
+      "n": 80,
+      "classes": 3,
+      "accuracy": 0.1125,
+      "macro_f1": 0.194376026272578,
+      "balanced_accuracy": 0.12094017094017095
+    },
+    "duration": {
+      "n": 114,
+      "mae": 1056.342105263158,
+      "median_abs_error": 185.5,
+      "mape_pct": 94.96035324837064,
+      "mape_n": 74
+    },
+    "count": {
+      "n": 89,
+      "mae": 6.044943820224719,
+      "median_abs_error": 2.0
+    }
+  },
+  "recordings": 40,
+  "slm_parser": {
+    "calls": 767,
+    "repairs": 1
+  },
+  "slm_explainer": {
+    "calls": 668,
+    "fallbacks_to_template": 16
+  }
+}

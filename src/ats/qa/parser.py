@@ -68,6 +68,7 @@ class Intent:
     phrases: list[str] = field(default_factory=list)            # the words that matched, for display
     t_range: tuple[float, float] | None = None
     question: str = ""
+    topic: str | None = None        # open-world subject named by the SLM (e.g. "exercise", "heart_rate")
 
 
 def _normalise(q: str) -> str:
